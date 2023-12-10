@@ -1,0 +1,143 @@
+{
+  "project_info": {
+    "project_number": "497512590176",
+    "project_id": "isportistan",
+    "storage_bucket": "isportistan.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497512590176:android:85d2d51778de98dd960c05",
+        "android_client_info": {
+          "package_name": "co.in.sportistan.sportistan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497512590176-aenkop28pmoair0h715anuki177032pf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "co.in.sportistan.sportistan",
+            "certificate_hash": "0b2727742488a5b8054d2a414708d7ccd7f80cf0"
+          }
+        },
+        {
+          "client_id": "497512590176-k2357th2q9rkmq4484uhmu4lqvmivi50.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDH0xeHQZsZUTtdv2kukd0BOI8Quomkuqw"
+        },
+        {
+          "current_key": "AIzaSyBeA3I5eNJkbzwRPc8cU1iDy50BrkcSPGM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497512590176-k2357th2q9rkmq4484uhmu4lqvmivi50.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "497512590176-h2v0qkgkp4bj4aodu56u8mnrgknd39cr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "co.in.sportistan.sportistan"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497512590176:android:fcfd99120b215cc0960c05",
+        "android_client_info": {
+          "package_name": "co.in.sportistan.sportistan_admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497512590176-k2357th2q9rkmq4484uhmu4lqvmivi50.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDH0xeHQZsZUTtdv2kukd0BOI8Quomkuqw"
+        },
+        {
+          "current_key": "AIzaSyBeA3I5eNJkbzwRPc8cU1iDy50BrkcSPGM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497512590176-k2357th2q9rkmq4484uhmu4lqvmivi50.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "497512590176-h2v0qkgkp4bj4aodu56u8mnrgknd39cr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "co.in.sportistan.sportistan"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497512590176:android:994971cae139f184960c05",
+        "android_client_info": {
+          "package_name": "co.in.sportistan.sportistan_partners"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497512590176-gmna9e2jna9bggbi1t5921a9pet7hqgt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "co.in.sportistan.sportistan_partners",
+            "certificate_hash": "0b2727742488a5b8054d2a414708d7ccd7f80cf0"
+          }
+        },
+        {
+          "client_id": "497512590176-k2357th2q9rkmq4484uhmu4lqvmivi50.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDH0xeHQZsZUTtdv2kukd0BOI8Quomkuqw"
+        },
+        {
+          "current_key": "AIzaSyBeA3I5eNJkbzwRPc8cU1iDy50BrkcSPGM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497512590176-k2357th2q9rkmq4484uhmu4lqvmivi50.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "497512590176-h2v0qkgkp4bj4aodu56u8mnrgknd39cr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "co.in.sportistan.sportistan"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
