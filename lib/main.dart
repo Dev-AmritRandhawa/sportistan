@@ -4,16 +4,47 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sportistan/home/home.dart';
 import 'package:sportistan/onboarding/onboarding.dart';
+import 'package:sportistan/widgets/local_notifications.dart';
 import 'package:sportistan/widgets/page_route.dart';
 import 'package:sportistan/widgets/permission_check.dart';
 import 'authentication/authentication.dart';
 import 'firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
+
+final messaging = FirebaseMessaging.instance;
+
+Future<void> requestPermission() async {
+  final settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    registerFCM();
+  }
+}
+
+Future<void> registerFCM() async {
+  Notifications.init();
+  await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+}
 
 
 Future<void> main() async {
@@ -22,10 +53,8 @@ Future<void> main() async {
   await FirebaseAppCheck.instance.activate(
       androidProvider: AndroidProvider.debug,
       appleProvider: AppleProvider.debug);
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((_) {
+    requestPermission();
     runApp(const MaterialApp(home: MyApp()));
-  });
 }
 
 class MyApp extends StatelessWidget {
@@ -132,7 +161,6 @@ class _MyHomePageState extends State<MyHomePage>
                   },
                 ),
               ),
-
             ],
           ),
         ),

@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lottie/lottie.dart';
 import 'package:otp_timer_button/otp_timer_button.dart';
 import 'package:pinput/pinput.dart';
@@ -33,8 +32,6 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
   final _server = FirebaseFirestore.instance;
   PanelController pc = PanelController();
 
-  int resendOtpCounter = 0;
-
   Future<void> _launchInBrowser(Uri url) async {
     if (!await launchUrl(
       url,
@@ -58,7 +55,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
   }
 
   final Uri toLaunch = Uri(
-      scheme: 'https', host: 'www.sportslovez.in', path: 'Terms&Conditions/');
+      scheme: 'https', host: 'www.sportistan.co.in', path: 'PrivacyPolicy/');
 
   @override
   void dispose() {
@@ -70,12 +67,10 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
     super.dispose();
   }
 
-
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     _controller = AnimationController(vsync: this);
-    _handleSignOut();
     super.initState();
   }
 
@@ -113,8 +108,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
             borderRadius: const BorderRadius.only(
                 topRight: Radius.circular(20), topLeft: Radius.circular(20)),
             controller: pc,
-            onPanelClosed: () {
-            },
+            onPanelClosed: () {},
             panelBuilder: () => _panel(),
             maxHeight: MediaQuery.of(context).size.height / 1.1,
             minHeight: 0,
@@ -181,7 +175,6 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
-                  readOnly: loading.value,
                   validator: (value) {
                     if (value!.isEmpty) {
                       return "Name required.";
@@ -216,9 +209,8 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
           CupertinoButton(
               color: Colors.green,
               onPressed: () {
-                if(nameKey.currentState!.validate()){
-                createAccount();
-
+                if (nameKey.currentState!.validate()) {
+                  createAccount();
                 }
               },
               child: const Text("Create an Account")),
@@ -228,20 +220,13 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
   }
 
   Future<void> _checkUserExistence() async {
-    CollectionReference collectionReference = _server
-        .collection("SportistanUsers")
-        .doc()
-        .collection("Account");
-    QuerySnapshot querySnapshot = await collectionReference.get();
-    if (querySnapshot.docs.isEmpty) {
-      pc.open();
-    } else {
-      _moveToHome();
-    }
-  }
-
-  void _moveToHome() {
-    PageRouter.pushRemoveUntil(context, const Home());
+    _server
+        .collection("Sportistan")
+        .where('userID', isEqualTo: _auth.currentUser!.uid)
+        .get()
+        .then((value) async => {
+              if (value.docChanges.isNotEmpty) {_moveToHome()} else {pc.open()}
+            });
   }
 
   _body() {
@@ -254,18 +239,16 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
       child: SafeArea(
         child:
             Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Text("Welcome to Sportistan",
-              style: TextStyle(
-                fontFamily: "DMSans",
-                fontWeight: FontWeight.bold,
-                fontSize: MediaQuery.of(context).size.width / 15,
-              )),
-          const Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30))),
+          Card(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
             child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text("Continue with Phone Number"),
+              padding: const EdgeInsets.all(8.0),
+              child: Text("Continue Using Number",
+                  style: TextStyle(
+                    fontFamily: "DMSans",
+                    fontSize: MediaQuery.of(context).size.width / 20,
+                  )),
             ),
           ),
           ValueListenableBuilder(
@@ -306,7 +289,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
                             child: const Icon(Icons.edit)),
                         fillColor: Colors.white,
                         border: const OutlineInputBorder(),
-                        errorStyle: const TextStyle(color: Colors.white),
+                        errorStyle: const TextStyle(color: Colors.red),
                         filled: true,
                         prefixIcon: CountryCodePicker(
                           showCountryOnly: true,
@@ -367,6 +350,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
                   ? SizedBox(
                       width: MediaQuery.of(context).size.width / 2,
                       child: OtpTimerButton(
+                        radius: 50,
                         buttonType: ButtonType.elevated_button,
                         controller: controller,
                         onPressed: () {
@@ -374,7 +358,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
                         },
                         text: const Text('Resend OTP',
                             style: TextStyle(
-                                color: Colors.white, fontFamily: "DMSans")),
+                                color: Colors.black, fontFamily: "DMSans")),
                         duration: 30,
                       ),
                     )
@@ -403,17 +387,8 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
               },
             ),
           ),
-          CupertinoButton(
-              color: Colors.indigo,
-              onPressed: () {
-                _handleSignIn();
-              },
-              child: const Text("Continue with Google Account")),
           Padding(
-            padding: EdgeInsets.only(
-                top: MediaQuery.of(context).size.width / 8,
-                left: MediaQuery.of(context).size.width / 30,
-                right: MediaQuery.of(context).size.width / 30),
+            padding: const EdgeInsets.all(10.0),
             child: GestureDetector(
               onTap: () async {
                 Platform.isIOS
@@ -425,12 +400,14 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
                   text: 'By pressing continue, you agree to our ',
                   style: TextStyle(
                     color: Colors.black,
+                    fontFamily: "DMSans",
                     fontSize: MediaQuery.of(context).size.width / 30,
                   ),
                   children: [
                     TextSpan(
                       text: 'Terms,',
                       style: TextStyle(
+                        fontFamily: "DMSans",
                         color: Colors.blue,
                         fontSize: MediaQuery.of(context).size.width / 30,
                       ),
@@ -438,6 +415,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
                     TextSpan(
                       text: ' Privacy Policy',
                       style: TextStyle(
+                        fontFamily: "DMSans",
                         color: Colors.blue,
                         fontSize: MediaQuery.of(context).size.width / 30,
                       ),
@@ -445,6 +423,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
                     TextSpan(
                       text: ' and ',
                       style: TextStyle(
+                        fontFamily: "DMSans",
                         color: Colors.black,
                         fontSize: MediaQuery.of(context).size.width / 30,
                       ),
@@ -452,6 +431,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
                     TextSpan(
                       text: 'Cookies Policy',
                       style: TextStyle(
+                        fontFamily: "DMSans",
                         color: Colors.blue,
                         fontSize: MediaQuery.of(context).size.width / 30,
                       ),
@@ -562,7 +542,9 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
         verification = verificationId;
       },
       timeout: const Duration(seconds: 60),
-      codeAutoRetrievalTimeout: (String verificationId) {},
+      codeAutoRetrievalTimeout: (String verificationId) {
+
+      },
     );
   }
 
@@ -582,44 +564,8 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
     }
   }
 
-  GoogleSignInAccount? currentUser;
-
-  GoogleSignIn googleSignIn = GoogleSignIn(
-    clientId: '100473162886811688440',
-  );
-  late String urls;
-
-  Future<void> _handleSignIn() async {
-    try {
-      currentUser = await googleSignIn.signIn();
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      // Obtain the auth details from the request.
-      final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
-      // Create a new credential.
-      final OAuthCredential googleCredential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      await FirebaseAuth.instance.signInWithCredential(googleCredential);
-      await _checkUserExistence();
-    } catch (error) {
-      _handleSignOut();
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(error.toString())));
-      }
-    }
-  }
-
-  Future<void> _handleSignOut() async {
-    if (currentUser != null) {
-      googleSignIn.disconnect();
-    }
-  }
-
   Future<void> createAccount() async {
-
-    try{
+    try {
       await _server
           .collection("SportistanUsers")
           .doc(_auth.currentUser!.uid)
@@ -632,19 +578,27 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
         'ratingTags': [],
         'isAccountOnHold': false
       }).then((value) => {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text("Account Created",style: TextStyle(color: Colors.green,fontFamily: "DMSans",)),
-      backgroundColor: Colors.black87,
-      )),
-        _moveToHome()});
-    }catch(error){
-      if(mounted){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(error.toString()),
-        backgroundColor: Colors.black87,
-      ));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("Account Created",
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontFamily: "DMSans",
+                      )),
+                  backgroundColor: Colors.black87,
+                )),
+                _moveToHome()
+              });
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(error.toString()),
+          backgroundColor: Colors.black87,
+        ));
+      }
     }
-    }
+  }
 
+  _moveToHome() {
+    PageRouter.pushRemoveUntil(context, const Home());
   }
 }

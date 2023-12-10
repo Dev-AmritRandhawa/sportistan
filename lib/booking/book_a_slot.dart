@@ -362,7 +362,7 @@ class _BookASlotState extends State<BookASlot> {
                               decoration: const InputDecoration(
                                   fillColor: Colors.white,
                                   border: InputBorder.none,
-                                  errorStyle: TextStyle(color: Colors.white),
+                                  errorStyle: TextStyle(color: Colors.red),
                                   labelText: "Team Name*",
                                   filled: true,
                                   labelStyle: TextStyle(color: Colors.black)),
@@ -394,7 +394,7 @@ class _BookASlotState extends State<BookASlot> {
                                   fillColor: Colors.white,
                                   labelText: "Contact Person*",
                                   border: InputBorder.none,
-                                  errorStyle: TextStyle(color: Colors.white),
+                                  errorStyle: TextStyle(color: Colors.red),
                                   filled: true,
                                   labelStyle: TextStyle(color: Colors.black)),
                             ),
@@ -432,7 +432,7 @@ class _BookASlotState extends State<BookASlot> {
                                   fillColor: Colors.white,
                                   border: InputBorder.none,
                                   errorStyle:
-                                      const TextStyle(color: Colors.white),
+                                      const TextStyle(color: Colors.red),
                                   filled: true,
                                   prefixIcon: IconButton(
                                       onPressed: () async {
@@ -630,7 +630,7 @@ class _BookASlotState extends State<BookASlot> {
                                 decoration: const InputDecoration(
                                   fillColor: Colors.white,
                                   border: InputBorder.none,
-                                  errorStyle: TextStyle(color: Colors.white),
+                                  errorStyle: TextStyle(color: Colors.red),
                                   filled: true,
                                   hintText: "Notes (Optional)",
                                   hintStyle: TextStyle(color: Colors.black45),
