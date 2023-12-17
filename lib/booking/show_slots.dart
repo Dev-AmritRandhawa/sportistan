@@ -381,8 +381,7 @@ class _ShowSlotsState extends State<ShowSlots> {
             slotTime: bookingElements[bookingCreated]["slotTime"],
             slotPrice: bookingElements[bookingCreated]["slotPrice"],
             feesDue: bookingElements[bookingCreated]["feesDue"],
-            entireDayBooked: bookingElements[bookingCreated]
-            ["entireDayBooking"],
+            entireDayBooked: bookingElements[bookingCreated]["entireDayBooking"],
           ));
           alreadyBooked.remove(slotsElements[DateFormat.EEEE().format(date)][j]
           ["slotID"] +
@@ -724,10 +723,6 @@ class _ShowSlotsState extends State<ShowSlots> {
         {
           moveToPages(bookings: bookings);
         }
-      case "Booked":
-        {
-          PageRouter.push(context, BookingInfo(bookingID: bookings.bookingID));
-        }
     }
   }
 
@@ -924,7 +919,7 @@ class MyBookings {
   final String group;
   final String date;
   final int slotPrice;
-  final int feesDue;
+  final num feesDue;
   final bool entireDayBooked;
   final String slotStatus;
   final String slotTime;

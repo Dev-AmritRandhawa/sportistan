@@ -10,6 +10,16 @@ class NavHistory extends StatefulWidget {
 class _NavHistoryState extends State<NavHistory> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold();
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+
+      ),
+      body: SafeArea(child: Column(children: [
+
+      ])),
+    );
   }
 }

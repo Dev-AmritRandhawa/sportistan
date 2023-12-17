@@ -10,7 +10,6 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:sportistan/booking/booking_info.dart';
 import 'package:sportistan/booking/payment_mode.dart';
-import 'package:sportistan/booking/sportistan_credit.dart';
 import 'package:sportistan/booking/unique.dart';
 import 'package:sportistan/nav/nav_profile.dart';
 import 'package:sportistan/widgets/errors.dart';
@@ -88,55 +87,49 @@ class _BookASlotState extends State<BookASlot> {
   late num totalSlotPrice;
 
   Future<void> serverInit() async {
-    try {
-      if (widget.bookingID.isNotEmpty) {
-        await _server
-            .collection("GroundBookings")
-            .where("bookingID", isEqualTo: widget.bookingID)
-            .get()
-            .then((value) => {
-                  if (value.docs.isNotEmpty)
-                    {
-                      updatedPrice = value.docs[0]["feesDue"],
-                      teamControllerA.text =
-                          value.docs.first["teamA"]["teamName"],
-                      teamControllerB.text =
-                          value.docs.first["teamB"]["teamName"],
-                      numberControllerA.text =
-                          value.docs.first["teamA"]["phoneNumber"],
-                      numberControllerB.text =
-                          value.docs.first["teamB"]["phoneNumber"],
-                      nameControllerA.text =
-                          value.docs.first["teamA"]["personName"],
-                      nameControllerB.text =
-                          value.docs.first["teamB"]["personName"],
-                      notesTeamA.text = value.docs.first["teamA"]["notesTeamA"],
-                      notesTeamB.text = value.docs.first["teamB"]["notesTeamB"],
-                      updatedPrice = value.docs.first["slotPrice"],
-                      priceController.text =
-                          value.docs.first["totalSlotPrice"].toString(),
-                      totalSlotPrice = value.docs.first["totalSlotPrice"],
-                      checkBoxTeamB.value = true,
-                      hideData.value = true,
-                      showTeamB.value = true,
-                      alreadyCommissionCharged = true,
-                      commissionCharged =
-                          value.docs.first["bookingCommissionCharged"],
-                    },
-                  _checkBalance(false)
-                });
-      } else {
-        priceController.text = widget.slotPrice.toString();
-        totalSlotPrice = widget.slotPrice;
-        updatedPrice = widget.slotPrice;
-        double newAmount = updatedPrice / 2.toInt().round();
-        priceController.text = newAmount.round().toInt().toString();
-        _checkBalance(false);
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.pop(context);
-      }
+    if (widget.bookingID.isNotEmpty) {
+      await _server
+          .collection("GroundBookings")
+          .where("bookingID", isEqualTo: widget.bookingID)
+          .get()
+          .then((value) => {
+                if (value.docs.isNotEmpty)
+                  {
+                    updatedPrice = value.docs[0]["feesDue"],
+                    teamControllerA.text =
+                        value.docs.first["teamA"]["teamName"],
+                    teamControllerB.text =
+                        value.docs.first["teamB"]["teamName"],
+                    numberControllerA.text =
+                        value.docs.first["teamA"]["phoneNumber"],
+                    numberControllerB.text =
+                        value.docs.first["teamB"]["phoneNumber"],
+                    nameControllerA.text =
+                        value.docs.first["teamA"]["personName"],
+                    nameControllerB.text =
+                        value.docs.first["teamB"]["personName"],
+                    notesTeamA.text = value.docs.first["teamA"]["notesTeamA"],
+                    notesTeamB.text = value.docs.first["teamB"]["notesTeamB"],
+                    updatedPrice = value.docs.first["slotPrice"],
+                    priceController.text =
+                        value.docs.first["totalSlotPrice"].toString(),
+                    totalSlotPrice = value.docs.first["totalSlotPrice"],
+                    checkBoxTeamB.value = true,
+                    hideData.value = true,
+                    showTeamB.value = true,
+                    alreadyCommissionCharged = true,
+                    commissionCharged =
+                        value.docs.first["bookingCommissionCharged"],
+                  },
+                _checkBalance(false)
+              });
+    } else {
+      priceController.text = widget.slotPrice.toString();
+      totalSlotPrice = widget.slotPrice;
+      updatedPrice = widget.slotPrice;
+      double newAmount = updatedPrice / 2.toInt().round();
+      priceController.text = newAmount.round().toInt().toString();
+      _checkBalance(false);
     }
   }
 
@@ -229,7 +222,7 @@ class _BookASlotState extends State<BookASlot> {
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -637,10 +630,10 @@ class _BookASlotState extends State<BookASlot> {
                                         color: Colors.green)),
                                 checkBoxTeamB.value
                                     ? Text(
-                                        "Slot Price is  For Both Team ₹ ${priceController.value.text.toString()}",
+                                        "Total Slot Price is For Both Team ₹ ${priceController.value.text.toString()}",
                                         style: const TextStyle(
                                           fontFamily: "DMSans",
-                                          fontSize: 22,
+                                          fontSize: 20,
                                         ))
                                     : Text(
                                         "Slot Price is For One Team ₹ ${priceController.value.text.toString()}",
@@ -657,11 +650,14 @@ class _BookASlotState extends State<BookASlot> {
                                         Icons.account_balance_wallet,
                                         color: Colors.brown,
                                       ),
-                                      Text(
-                                          'Your Current Balance is ₹ ${balance.toString()}',
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              fontFamily: "DMSans")),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                            'Your Current Balance is ₹ ${balance.toString()}',
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontFamily: "DMSans")),
+                                      ),
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -803,7 +799,7 @@ class _BookASlotState extends State<BookASlot> {
         await sendSms(number: numberControllerA.value.text);
         if (numberControllerB.value.text.isNotEmpty) {
           if (numberControllerA.value.text != numberControllerB.value.text) {
-            await sendSms(number: numberControllerB.value.text);
+            await sendSms(number: numberControllerA.value.text);
           }
         }
       }
@@ -831,15 +827,16 @@ class _BookASlotState extends State<BookASlot> {
         .where('groundID', isEqualTo: widget.groundID.toString())
         .get();
     num commission = partner.docChanges.first.doc.get("commission");
-    double result = double.parse(priceController.value.text.trim()) / 100;
+    double result = int.parse(priceController.value.text.trim()) / 100;
     double newCommissionCharge = result * commission.toInt();
-    if (checkBoxTeamB.value) {
-      serverCommissionCharge = newCommissionCharge / 2;
-      commissionCalculateListener.value = true;
+
+    if (alreadyCommissionCharged) {
+      serverCommissionCharge = newCommissionCharge - commissionCharged;
     } else {
       serverCommissionCharge = newCommissionCharge;
-      commissionCalculateListener.value = true;
     }
+
+    commissionCalculateListener.value = true;
 
     if (wannaBook) {
       if (serverCommissionCharge <= balance) {
@@ -855,6 +852,7 @@ class _BookASlotState extends State<BookASlot> {
               'groundType': widget.groundType,
               'shouldCountInBalance': false,
               'isBookingCancelled': false,
+              'entireDayBooking': false,
               'userID': _auth.currentUser!.uid,
               'bookingCommissionCharged': serverCommissionCharge,
               'feesDue': calculateFeesDue(),
@@ -894,7 +892,7 @@ class _BookASlotState extends State<BookASlot> {
               'slotStatus': slotStatus(),
               'bothTeamBooked': checkBoxTeamB.value,
               'slotID': widget.slotID,
-              'bookingID': widget.bookingID,
+              'bookingID': uniqueID,
               'date': widget.date,
             }).then((value) async => {
                   await _server
@@ -937,6 +935,7 @@ class _BookASlotState extends State<BookASlot> {
               'feesDue': calculateFeesDue(),
               'paymentMode': PaymentMode.type,
               'ratingGiven': false,
+              'entireDayBooking': false,
               'rating': 3.0,
               'ratingTags': [],
               'groundID': widget.groundID,
@@ -1011,6 +1010,10 @@ class _BookASlotState extends State<BookASlot> {
                           color: Colors.red),
                     ),
                   ),
+                  const Icon(
+                    Icons.warning,
+                    color: Colors.orangeAccent,
+                  ),
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
@@ -1018,16 +1021,7 @@ class _BookASlotState extends State<BookASlot> {
                       style: TextStyle(fontFamily: "DMSans", fontSize: 16),
                     ),
                   ),
-                  Card(
-                      child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      widget.groundName,
-                      softWrap: true,
-                      style:
-                          const TextStyle(fontFamily: "DMSans", fontSize: 16),
-                    ),
-                  )),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -1045,7 +1039,7 @@ class _BookASlotState extends State<BookASlot> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      "Our commitment to assist you better we are charging ${commission.toString()}% commission from you which is Rs.${serverCommissionCharge.toString()} Please add credits to continue booking services on Sportistan",
+                      "Please pay advance Rs.$serverCommissionCharge to create this booking! Due to low balance we are not able to proceed. Please add credits in wallet to continue booking services on Sportistan",
                       style: const TextStyle(
                           fontSize: 22,
                           color: Colors.black54,
@@ -1056,7 +1050,7 @@ class _BookASlotState extends State<BookASlot> {
                       color: Colors.green,
                       child: const Text("Add Credits"),
                       onPressed: () {
-                        PageRouter.push(context, const SportistanCredit());
+                        PageRouter.push(context, const NavProfile());
                       })
                 ],
               );
