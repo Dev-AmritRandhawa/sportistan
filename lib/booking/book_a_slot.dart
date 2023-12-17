@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:sportistan/booking/booking_info.dart';
 import 'package:sportistan/booking/payment_mode.dart';
 import 'package:sportistan/booking/unique.dart';
-import 'package:sportistan/nav/nav_profile.dart';
+import 'package:sportistan/payment/sportistan_credit.dart';
 import 'package:sportistan/widgets/errors.dart';
 import 'package:sportistan/widgets/page_route.dart';
 
@@ -666,7 +666,7 @@ class _BookASlotState extends State<BookASlot> {
                                               color: Colors.green,
                                               onPressed: () {
                                                 PageRouter.push(context,
-                                                    const NavProfile());
+                                                    const SportistanCredit());
                                               },
                                               child: const Text("My Wallet")),
                                         ],
@@ -1050,7 +1050,7 @@ class _BookASlotState extends State<BookASlot> {
                       color: Colors.green,
                       child: const Text("Add Credits"),
                       onPressed: () {
-                        PageRouter.push(context, const NavProfile());
+                        PageRouter.push(context, const SportistanCredit());
                       })
                 ],
               );

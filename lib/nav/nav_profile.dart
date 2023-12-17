@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sportistan/authentication/authentication.dart';
+import 'package:sportistan/payment/sportistan_credit.dart';
 import 'package:sportistan/widgets/page_route.dart';
 
 class NavProfile extends StatefulWidget {
@@ -23,7 +24,12 @@ class _NavProfileState extends State<NavProfile> {
               FirebaseAuth.instance.signOut().then((value) => {
                 PageRouter.pushRemoveUntil(context, const PhoneAuthentication())
               });
-            },child: const Text("Logout"),)
+            },child: const Text("Logout"),),
+            MaterialButton(
+              color: Colors.red,
+              onPressed: (){
+                PageRouter.push(context, const SportistanCredit());
+            },child: const Text("ddsd"),)
           ]),
         ),
       ),

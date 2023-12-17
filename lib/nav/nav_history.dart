@@ -15,10 +15,18 @@ class _NavHistoryState extends State<NavHistory> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-
       ),
-      body: SafeArea(child: Column(children: [
-
+      body: SafeArea(
+          child: Column(children: [
+        Center(
+            child: Text(
+          'Booking History',
+          style: TextStyle(fontFamily: "DMSans", fontSize: 20),
+        )),
+        Icon(
+          Icons.history,
+          color: Colors.green,
+        ),
       ])),
     );
   }
