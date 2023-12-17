@@ -61,6 +61,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "497512590176-sr03pnn7u84ke832dkbegphve5qosbc0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "co.in.sportistan.sportistan_admin",
+            "certificate_hash": "2f627bcfbaad45d4dcc2e37a09e60b06f2383454"
+          }
+        },
+        {
           "client_id": "497512590176-k2357th2q9rkmq4484uhmu4lqvmivi50.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -100,11 +108,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "497512590176-gmna9e2jna9bggbi1t5921a9pet7hqgt.apps.googleusercontent.com",
+          "client_id": "497512590176-9dmj1ljdnr1n9qv03h2mm4ss61prasiu.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "co.in.sportistan.sportistan_partners",
-            "certificate_hash": "0b2727742488a5b8054d2a414708d7ccd7f80cf0"
+            "certificate_hash": "b2f17a16c055271921b286a836637eacfae89d10"
           }
         },
         {

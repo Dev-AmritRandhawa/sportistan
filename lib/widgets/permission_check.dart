@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sportistan/home/home.dart';
+import 'package:sportistan/nav/home.dart';
 import 'package:sportistan/widgets/page_route.dart';
 
 class PermissionCheck extends StatefulWidget {

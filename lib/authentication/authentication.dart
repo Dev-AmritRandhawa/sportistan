@@ -9,7 +9,7 @@ import 'package:lottie/lottie.dart';
 import 'package:otp_timer_button/otp_timer_button.dart';
 import 'package:pinput/pinput.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
-import 'package:sportistan/home/home.dart';
+import 'package:sportistan/nav/nav_home.dart';
 import 'package:sportistan/widgets/errors.dart';
 import 'package:sportistan/widgets/page_route.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -55,7 +55,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
   }
 
   final Uri toLaunch = Uri(
-      scheme: 'https', host: 'www.sportistan.co.in', path: 'PrivacyPolicy/');
+      scheme: 'https/', host: 'www.sportistan.co.in', path: '/');
 
   @override
   void dispose() {
@@ -82,6 +82,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
   GlobalKey<FormState> otpKey = GlobalKey<FormState>();
   ValueNotifier<bool> loading = ValueNotifier<bool>(false);
   ValueNotifier<bool> buttonDisable = ValueNotifier<bool>(false);
+  ValueNotifier<bool> loader = ValueNotifier<bool>(false);
   ValueNotifier<bool> imageShow = ValueNotifier<bool>(true);
   OtpTimerButtonController controller = OtpTimerButtonController();
 
@@ -206,14 +207,18 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
                 ..repeat();
             },
           ),
-          CupertinoButton(
-              color: Colors.green,
-              onPressed: () {
-                if (nameKey.currentState!.validate()) {
-                  createAccount();
-                }
-              },
-              child: const Text("Create an Account")),
+          ValueListenableBuilder(
+              valueListenable: loader,
+              builder: (context, value, child) => value
+                  ? const Center(child: CircularProgressIndicator(strokeWidth: 1,backgroundColor: Colors.white,))
+                  : CupertinoButton(
+                      color: Colors.green,
+                      onPressed: () {
+                        if (nameKey.currentState!.validate()) {
+                          createAccount();
+                        }
+                      },
+                      child: const Text("Create an Account"))),
         ],
       ),
     );
@@ -221,7 +226,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
 
   Future<void> _checkUserExistence() async {
     _server
-        .collection("Sportistan")
+        .collection("SportistanUsers")
         .where('userID', isEqualTo: _auth.currentUser!.uid)
         .get()
         .then((value) async => {
@@ -239,17 +244,10 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
       child: SafeArea(
         child:
             Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("Continue Using Number",
-                  style: TextStyle(
-                    fontFamily: "DMSans",
-                    fontSize: MediaQuery.of(context).size.width / 20,
-                  )),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.asset('assets/logo.png',
+                height: MediaQuery.of(context).size.height / 8),
           ),
           ValueListenableBuilder(
             valueListenable: loading,
@@ -541,10 +539,8 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
       codeSent: (String verificationId, int? resendToken) async {
         verification = verificationId;
       },
-      timeout: const Duration(seconds: 60),
-      codeAutoRetrievalTimeout: (String verificationId) {
-
-      },
+      timeout: const Duration(seconds: 0),
+      codeAutoRetrievalTimeout: (String verificationId) {},
     );
   }
 
@@ -565,30 +561,29 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
   }
 
   Future<void> createAccount() async {
+    loader.value = true;
     try {
-      await _server
-          .collection("SportistanUsers")
-          .doc(_auth.currentUser!.uid)
-          .collection("Account")
-          .doc()
-          .set({
+      await _server.collection("SportistanUsers").add({
         'accountCreatedAt': DateTime.now(),
-        'deviceID': [],
         'rating': 3.0,
         'ratingTags': [],
-        'isAccountOnHold': false
+        'sportistanCredit' : 50,
+        'name': nameController.value.text.toString(),
+        'isAccountOnHold': false,
+        'userID': _auth.currentUser!.uid
       }).then((value) => {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text("Account Created",
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontFamily: "DMSans",
-                      )),
-                  backgroundColor: Colors.black87,
-                )),
-                _moveToHome()
-              });
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Account Created Successfully",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: "DMSans",
+                  )),
+              backgroundColor: Colors.black87,
+            )),
+            _moveToHome()
+          });
     } catch (error) {
+      loader.value = false;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(error.toString()),
@@ -599,6 +594,6 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
   }
 
   _moveToHome() {
-    PageRouter.pushRemoveUntil(context, const Home());
+    PageRouter.pushRemoveUntil(context, const NavHome());
   }
 }

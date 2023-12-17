@@ -4,10 +4,12 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sportistan/home/home.dart';
+import 'package:sportistan/nav/home.dart';
+import 'package:sportistan/nav/nav_home.dart';
 import 'package:sportistan/onboarding/onboarding.dart';
 import 'package:sportistan/widgets/local_notifications.dart';
 import 'package:sportistan/widgets/page_route.dart';
@@ -53,8 +55,11 @@ Future<void> main() async {
   await FirebaseAppCheck.instance.activate(
       androidProvider: AndroidProvider.debug,
       appleProvider: AppleProvider.debug);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
     requestPermission();
     runApp(const MaterialApp(home: MyApp()));
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -62,8 +67,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MyHomePage(),
+    return  MaterialApp(
+      theme: ThemeData.light(useMaterial3: false),
+      home: const MyHomePage(),
     );
   }
 }
@@ -79,7 +85,6 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  final _server = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -124,16 +129,7 @@ class _MyHomePageState extends State<MyHomePage>
             (_) => Future.delayed(const Duration(milliseconds: 3500), () async {
           FirebaseAuth.instance.authStateChanges().listen((User? user) async {
             if (user != null) {
-                CollectionReference collectionReference = _server
-                    .collection("SportistanUsers")
-                    .doc(user.uid)
-                    .collection("Account");
-                QuerySnapshot querySnapshot = await collectionReference.get();
-                if (querySnapshot.docs.isEmpty) {
-                  _moveToDecision(const PhoneAuthentication());
-                } else {
-                  getLocationPermission();
-                }
+              PageRouter.pushRemoveUntil(context, const NavHome());
 
             } else {
               _userStateSave();
