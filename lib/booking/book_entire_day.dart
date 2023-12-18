@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,11 +22,10 @@ class BookEntireDay extends StatefulWidget {
   final String groundID;
   final String groundName;
 
-  const BookEntireDay(
-      {super.key,
-        required this.date,
-        required this.groundID,
-        required this.groundName});
+  const BookEntireDay({super.key,
+    required this.date,
+    required this.groundID,
+    required this.groundName});
 
   @override
   State<BookEntireDay> createState() => _BookEntireDayState();
@@ -42,12 +40,10 @@ class _BookEntireDayState extends State<BookEntireDay> {
   ValueNotifier<bool> listShow = ValueNotifier<bool>(false);
   ValueNotifier<bool> switchBuilder = ValueNotifier<bool>(false);
   ValueNotifier<bool> amountUpdater = ValueNotifier<bool>(false);
-  TextEditingController advancePaymentController = TextEditingController();
-  GlobalKey<FormState> advancePaymentKey = GlobalKey<FormState>();
-
-  late List<DocumentChange<Map<String, dynamic>>> data;
 
   bool updateSmsAlert = true;
+
+  String? refID;
 
   @override
   void initState() {
@@ -131,7 +127,9 @@ class _BookEntireDayState extends State<BookEntireDay> {
                   Padding(
                     padding: const EdgeInsets.only(right: 8, left: 8),
                     child: Text(
-                        "${DateFormat.yMMMd().format(DateTime.parse(widget.date))} (${DateFormat.EEEE().format(DateTime.parse(widget.date))})",
+                        "${DateFormat.yMMMd().format(
+                            DateTime.parse(widget.date))} (${DateFormat.EEEE()
+                            .format(DateTime.parse(widget.date))})",
                         style: const TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
@@ -139,7 +137,10 @@ class _BookEntireDayState extends State<BookEntireDay> {
                   ),
                   Container(
                     width: double.infinity,
-                    height: MediaQuery.of(context).size.height / 12,
+                    height: MediaQuery
+                        .of(context)
+                        .size
+                        .height / 12,
                     alignment: Alignment.topCenter,
                     child: ListView.builder(
                         shrinkWrap: true,
@@ -165,7 +166,8 @@ class _BookEntireDayState extends State<BookEntireDay> {
                                       bookings.slotTime,
                                       style: TextStyle(
                                           color: Colors.black54,
-                                          fontSize: MediaQuery.of(context)
+                                          fontSize: MediaQuery
+                                              .of(context)
                                               .size
                                               .width /
                                               30),
@@ -192,7 +194,10 @@ class _BookEntireDayState extends State<BookEntireDay> {
                         child: Form(
                           key: teamControllerKeyA,
                           child: SizedBox(
-                            width: MediaQuery.of(context).size.width / 1.2,
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width / 1.2,
                             child: TextFormField(
                               validator: (value) {
                                 if (value!.isEmpty) {
@@ -223,7 +228,10 @@ class _BookEntireDayState extends State<BookEntireDay> {
                         child: Form(
                           key: nameKeyA,
                           child: SizedBox(
-                            width: MediaQuery.of(context).size.width / 1.2,
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width / 1.2,
                             child: TextFormField(
                               validator: (value) {
                                 if (value!.isEmpty) {
@@ -254,7 +262,10 @@ class _BookEntireDayState extends State<BookEntireDay> {
                         child: Form(
                           key: numberKeyA,
                           child: SizedBox(
-                            width: MediaQuery.of(context).size.width / 1.2,
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width / 1.2,
                             child: TextFormField(
                               validator: (value) {
                                 if (value!.isEmpty) {
@@ -296,48 +307,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 2,
-                        child: Form(
-                          key: advancePaymentKey,
-                          child: TextFormField(
-                            controller: advancePaymentController,
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                Errors.flushBarInform(
-                                    "Advance Amount is Missing",
-                                    context,
-                                    "Error");
-                                return "Enter Advance";
-                              } else if (int.parse(
-                                  advancePaymentController.value.text) >
-                                  double.parse(entireDayAmount!)
-                                      .toDouble()
-                                      .round()
-                                      .toInt()) {
-                                return "Invalid Amount";
-                              } else {
-                                return null;
-                              }
-                            },
-                            keyboardType: TextInputType.phone,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            autofillHints: const [
-                              AutofillHints.telephoneNumberLocal
-                            ],
-                            decoration: const InputDecoration(
-                              fillColor: Colors.white,
-                              border: InputBorder.none,
-                              errorStyle: TextStyle(color: Colors.red),
-                              filled: true,
-                              label: Text("Advance if received?"),
-                              hintText: "Booking Amt?",
-                            ),
-                          ),
-                        ),
-                      ),
+
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: SizedBox(
@@ -396,18 +366,18 @@ class _BookEntireDayState extends State<BookEntireDay> {
                   onPressed: () {
                     if (nameKeyA.currentState!.validate() &
                     numberKeyA.currentState!.validate() &
-                    teamControllerKeyA.currentState!.validate() &
-                    advancePaymentKey.currentState!.validate()) {
-                      if (data.isNotEmpty) {
-                        _checkBalance(data);
-                      }
+                    teamControllerKeyA.currentState!.validate()) {
+                      _checkBalance();
                     } else {
                       Errors.flushBarInform(
                           "Please Fill The Details", context, "Error");
                     }
                   }),
               SizedBox(
-                height: MediaQuery.of(context).size.height / 8,
+                height: MediaQuery
+                    .of(context)
+                    .size
+                    .height / 8,
               )
             ],
           ),
@@ -417,93 +387,33 @@ class _BookEntireDayState extends State<BookEntireDay> {
   }
 
   List allData = [];
-  String? entireDayAmount;
-  late num commission;
+  late num entireDayAmount;
+  late num balance;
+  late num partnerCommission;
+  late String groundType;
+  late num advancePay;
+  late num updatedBalance;
 
-  Future<void> _checkBalance(
-      List<DocumentChange<Map<String, dynamic>>> data) async {
-    num balance = data.first.doc.get("sportistanCredit");
-    num commission = data.first.doc.get("commission");
-    String groundType = data.first.doc.get("groundType");
-    double result =
-        double.parse(entireDayAmount!).toDouble().toInt().round() / 100;
-    double commissionCharge = result * commission.toInt();
-    if (commissionCharge <= balance) {
-      createBooking(
-          balance: balance,
-          commissionCharge: commissionCharge,
-          keepBalance: balance,
-          groundType: groundType);
-    } else {
-      showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Low Balance",
-                    style: TextStyle(
-                        fontFamily: "DMSans", fontSize: 22, color: Colors.red),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Not Able to create booking due to low balance",
-                    style: TextStyle(fontFamily: "DMSans", fontSize: 16),
-                  ),
-                ),
-                Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        widget.groundName,
-                        softWrap: true,
-                        style: const TextStyle(fontFamily: "DMSans", fontSize: 16),
-                      ),
-                    )),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Rs.',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    Text(
-                      balance.toString(),
-                      style: const TextStyle(
-                          fontSize: 50, color: Colors.redAccent),
-                    ),
-                  ],
-                ),
-                CupertinoButton(
-                    color: Colors.green,
-                    child: const Text("Add Credits"),
-                    onPressed: () {
-                      PageRouter.push(context, const SportistanCredit());
-                    }),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Our commitment to assist you better we are charging ${commission.toString()}% commission from you which is Rs.${commissionCharge.toString()} Please add credits to continue booking services on Sportistan",
-                    style: const TextStyle(
-                        fontSize: 22,
-                        color: Colors.black54,
-                        fontFamily: "Nunito"),
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 5,
-                )
-              ],
-            ),
-          );
-        },
-      );
+  Future<void> _checkBalance() async {
+    try {
+      await _server
+          .collection('SportistanUsers')
+          .where('userID', isEqualTo: _auth.currentUser!.uid)
+          .get()
+          .then((value) =>
+      {
+        balance = value.docChanges.first.doc.get('sportistanCredits'),
+      });
+
+      double result = entireDayAmount / 100;
+      advancePay = result * partnerCommission.toInt();
+      if (advancePay <= balance) {
+        createBooking();
+      } else {
+        showError();
+      }
+    } catch (e) {
+      return;
     }
   }
 
@@ -512,11 +422,13 @@ class _BookEntireDayState extends State<BookEntireDay> {
         .collection("SportistanPartners")
         .where('groundID', isEqualTo: widget.groundID)
         .get()
-        .then((value) => {
-      data = value.docChanges,
+        .then((value) =>
+    {
       allData = value.docChanges.first.doc
           .get(DateFormat.EEEE().format(DateTime.parse(widget.date))),
-      commission = value.docChanges.first.doc.get('commission'),
+      refID = value.docChanges.first.doc.id,
+      partnerCommission = value.docChanges.first.doc.get('commission'),
+      groundType = value.docChanges.first.doc.get('groundType'),
       entireDayAmount = value.docChanges.first.doc.get(
           '${DateFormat.EEEE().format(DateTime.parse(widget.date))}EntireDay'),
     });
@@ -535,55 +447,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
         ));
       }
     }
-
     listShow.value = true;
-    await showKYCErrorIfExist(data);
-  }
-
-  showKYCErrorIfExist(List<DocumentChange<Map<String, dynamic>>> data) async {
-    bool result = await data.first.doc.get('isVerified');
-    bool result2 = await data.first.doc.get('isKYCPending');
-    if (!result) {
-      if (result2) {
-        if (mounted) {
-          showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (ctx) {
-              return Platform.isIOS
-                  ? CupertinoAlertDialog(
-                title: const Text("KYC is Pending",
-                    style: TextStyle(color: Colors.orange)),
-                content: const Text(
-                    "KYC is UnderReview Please Check Status in Profile > My Grounds or Contact Customer Support"),
-                actions: [
-                  TextButton(
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        Navigator.pop(context);
-                      },
-                      child: const Text("OK"))
-                ],
-              )
-                  : AlertDialog(
-                title: const Text("KYC is Pending",
-                    style: TextStyle(color: Colors.orange)),
-                content: Text(
-                    "Your ${widget.groundName} KYC is Under Review Please Check Status in Profile > My Grounds or Contact Helpdesk"),
-                actions: [
-                  TextButton(
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        Navigator.pop(context);
-                      },
-                      child: const Text("OK"))
-                ],
-              );
-            },
-          );
-        }
-      }
-    }
   }
 
   List<String> bookingID = [];
@@ -622,11 +486,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
 
   String groupID = UniqueID.generateRandomString();
 
-  Future<void> createBooking(
-      {required double commissionCharge,
-        required num balance,
-        required String groundType,
-        required num keepBalance}) async {
+  Future<void> createBooking() async {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text("Booking is creating"),
       backgroundColor: Colors.green,
@@ -649,17 +509,16 @@ class _BookEntireDayState extends State<BookEntireDay> {
         'entireDayBooking': true,
         'groupID': groupID,
         'shouldCountInBalance': false,
-        'bookingCommissionCharged': commissionCharge,
+        'bookingCommissionCharged': advancePay,
         'entireDayBookingID': bookingID,
         'includeSlots': includeSlots,
-        'feesDue': double.parse(entireDayAmount!).toDouble().round().toInt() -
-            int.parse(advancePaymentController.value.text.trim().toString()),
+        'feesDue': entireDayAmount  - advancePay,
         'ratingGiven': false,
         'rating': 3.0,
-        'TeamA' : 'Not Applicable',
-        'TeamB' : "Not Applicable",
+        'TeamA': 'Not Applicable',
+        'TeamB': "Not Applicable",
         'advancePayment':
-        double.parse(advancePaymentController.value.text).round().toInt(),
+        advancePay,
         'bothTeamBooked': true,
         'groundID': widget.groundID,
         "teamA": {
@@ -676,7 +535,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
           'phoneNumber': numberControllerA.value.text,
           "notesTeamB": notesTeamA.value.text.toString(),
         },
-        'slotPrice': double.parse(entireDayAmount!).toDouble().round().toInt(),
+        'slotPrice':entireDayAmount,
         'slotStatus': "Booked",
         'slotTime': allData[j]["time"],
         'slotID': allData[j]["slotID"],
@@ -685,17 +544,30 @@ class _BookEntireDayState extends State<BookEntireDay> {
       });
     }
     await _server
-        .collection("SportistanUsers")
-        .doc(data.first.doc.id)
-        .update({'sportistanCredit': keepBalance - commissionCharge}).then(
-            (value) => {
-          if (mounted) {alertUser(bookingID: bookingID[0])}
-        });
+        .collection('SportistanUsers')
+        .where('userID', isEqualTo: _auth.currentUser!.uid)
+        .get()
+        .then((value) =>
+    {
+      updatedBalance = value.docChanges.first.doc.get('sportistanCredits'),
+    }).then((value) async => {
+      await _server
+          .collection("SportistanUsers")
+          .doc(refID)
+          .update({'sportistanCredit': updatedBalance - advancePay}).then(
+              (value) =>
+          {
+            if (mounted) {alertUser(bookingID: bookingID[0])}
+          })
+    });
+
   }
 
   Future<void> sendSms({required String number}) async {
     String url =
-        'http://api.bulksmsgateway.in/sendmessage.php?user=sportslovez&password=7788330&mobile=$number&message=Your Booking is Confirmed at ${widget.groundName} on ${DateFormat.yMMMd().format(DateTime.parse(widget.date))} for Entire Day Thanks for Choosing Facility on Sportistan&sender=SPTNOT&type=3&template_id=1407170003612415391';
+        'http://api.bulksmsgateway.in/sendmessage.php?user=sportslovez&password=7788330&mobile=$number&message=Your Booking is Confirmed at ${widget
+        .groundName} on ${DateFormat.yMMMd().format(DateTime.parse(widget
+        .date))} for Entire Day Thanks for Choosing Facility on Sportistan&sender=SPTNOT&type=3&template_id=1407170003612415391';
     await http.post(Uri.parse(url));
   }
 
@@ -718,6 +590,83 @@ class _BookEntireDayState extends State<BookEntireDay> {
     PageRouter.pushReplacement(
         context, BookingEntireDayInfo(bookingID: bookingID));
   }
+
+  void showError() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  "Low Balance",
+                  style: TextStyle(
+                      fontFamily: "DMSans", fontSize: 22, color: Colors.red),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  "Not Able to create booking due to low balance",
+                  style: TextStyle(fontFamily: "DMSans", fontSize: 16),
+                ),
+              ),
+              Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      widget.groundName,
+                      softWrap: true,
+                      style: const TextStyle(
+                          fontFamily: "DMSans", fontSize: 16),
+                    ),
+                  )),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Rs.',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  Text(
+                    balance.toString(),
+                    style:
+                    const TextStyle(fontSize: 50, color: Colors.redAccent),
+                  ),
+                ],
+              ),
+              CupertinoButton(
+                  color: Colors.green,
+                  child: const Text("Add Credits"),
+                  onPressed: () {
+                    PageRouter.push(context, const SportistanCredit());
+                  }),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Our commitment to assist you better Please Pay ${advancePay
+                      .toString()}  Please add credits to continue booking services on Sportistan to Complete this Booking",
+                  style: const TextStyle(
+                      fontSize: 22,
+                      color: Colors.black54,
+                      fontFamily: "Nunito"),
+                ),
+              ),
+              SizedBox(
+                height: MediaQuery
+                    .of(context)
+                    .size
+                    .height / 5,
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 class MySlots {
@@ -730,15 +679,14 @@ class MySlots {
   final String slotTime;
   final String bookingID;
 
-  MySlots(
-      {required this.slotID,
-        required this.group,
-        required this.feesDue,
-        required this.date,
-        required this.bookingID,
-        required this.slotPrice,
-        required this.slotStatus,
-        required this.slotTime});
+  MySlots({required this.slotID,
+    required this.group,
+    required this.feesDue,
+    required this.date,
+    required this.bookingID,
+    required this.slotPrice,
+    required this.slotStatus,
+    required this.slotTime});
 
   Map groupItemsByGroup(List items) {
     return groupBy(items, (item) => item.group);

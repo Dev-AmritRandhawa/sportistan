@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
+import 'package:sportistan/widgets/page_route.dart';
 
 class SportistanCredit extends StatefulWidget {
   const SportistanCredit({super.key});
@@ -201,6 +204,7 @@ class _SportistanCreditState extends State<SportistanCredit>
             color: Colors.green.shade900,
             onPressed: () {
               if (addBalanceControllerKey.currentState!.validate()) {
+                PageRouter.push(context, const Gateway());
 
               }
             },
@@ -215,5 +219,133 @@ class _SportistanCreditState extends State<SportistanCredit>
         )
       ]),
     );
+  }
+}
+
+
+
+class Gateway extends StatefulWidget {
+  const Gateway({super.key});
+
+  @override
+  State<Gateway> createState() => _GatewayState();
+}
+
+class _GatewayState extends State<Gateway> {
+  // possible values: UAT_SIM, PRODUCTION
+  String environment = 'UAT_SIM';
+
+  // Pass Empty String for testing
+  String appId = '';
+
+  // provided by phonePe for testing purpose use PGTESTPAYUAT
+  String merchantId = 'PGTESTPAYUAT';
+
+  //Depend on you if you want log pass true else false
+  bool enableLogging = true;
+
+  Object? result;
+
+  // Create using sha256 with package crypto
+  String? checksum;
+
+  //provided by phonePe for testing use '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399'
+  String saltKey = '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399';
+
+  //provided by phonePe for testing use '1'
+  String keyIndex = "1";
+
+  String callBackURL =
+      "https://webhook.site/04fd67c2-a4e4-4b8e-ab92-f951ab285bda";
+
+  String? body;
+
+  ValueNotifier<bool> statusListener = ValueNotifier<bool>(false);
+
+  getChecksum() {
+    final response = {
+      "merchantId": merchantId,
+      "merchantTransactionId": "transaction_123",
+      "merchantUserId": "90223250",
+      "amount": 100,
+      "mobileNumber": "9999999999",
+      "callbackUrl": callBackURL,
+      "paymentInstrument": {
+        "type": "PAY_PAGE",
+      },
+    };
+    String base64Body = base64Encode(utf8.encode(jsonEncode(response)));
+    checksum =
+    "${sha256.convert(utf8.encode('$base64Body/pg/v1/pay$saltKey')).toString()}###$keyIndex";
+    return base64Body;
+  }
+
+  @override
+  void initState() {
+    initPaymentGateway();
+    body = getChecksum().toString();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: SafeArea(
+          child: Column(
+            children: [
+              ValueListenableBuilder(
+                valueListenable: statusListener,
+                builder: (context, value, child) {
+                  return value
+                      ? Center(child: Text(result!.toString()))
+                      : const Center(child: CircularProgressIndicator());
+                },
+              ),
+              CupertinoButton(
+                  color: Colors.green,
+                  onPressed: () {
+                    startPGTransaction();
+                  },
+                  child: const Text("Start Transaction"))
+            ],
+          )),
+    );
+  }
+
+  // initialize gateway
+  initPaymentGateway() {
+    PhonePePaymentSdk.init(environment, appId, merchantId, enableLogging)
+        .then((val) => {
+      result = 'PhonePe SDK Initialized - $val',
+      statusListener.value = true
+    })
+        .catchError((error) {
+      result = error;
+      statusListener.value = true;
+      return error;
+    });
+  }
+
+  Future<Map<dynamic, dynamic>?> startPGTransaction() async {
+    try {
+      var response = PhonePePaymentSdk.startPGTransaction(
+          body.toString(), callBackURL, checksum.toString(), {}, '/pg/v1/pay', '');
+      response
+          .then((val) => {
+        setState(() {
+          result = val;
+        })
+      })
+          .catchError((error) {
+        result = error;
+        statusListener.value = true;
+        return <dynamic>{};
+      });
+    } catch (error) {
+      result = error;
+      statusListener.value = true;
+    }
+    return null;
   }
 }

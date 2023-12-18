@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:intl/intl.dart';
 import 'package:pinput/pinput.dart';
 import 'package:share_plus/share_plus.dart';
@@ -28,6 +29,9 @@ class _NavProfileState extends State<NavProfile> {
   var notificationListenable = ValueNotifier(true);
   var imageListener = ValueNotifier(true);
   String countryCode = "+91";
+  final _auth = FirebaseAuth.instance;
+
+  String? verification;
 
   Future<void> _launchInBrowser(Uri url) async {
     if (!await launchUrl(
@@ -62,11 +66,15 @@ class _NavProfileState extends State<NavProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SlidingUpPanel(controller: pc,maxHeight: MediaQuery.of(context).size.height/2,
+      body: SlidingUpPanel(controller: pc,
+        minHeight: 0,
+        maxHeight: MediaQuery.of(context).size.height/2,
         panelBuilder: () => panel(),
         body: SafeArea(
           child: SingleChildScrollView(
-            child: Column(children: [
+            child: Column(
+
+                children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -108,307 +116,309 @@ class _NavProfileState extends State<NavProfile> {
                             Timestamp time = doc[index]['accountCreatedAt'];
                             String date =
                                 DateFormat.yMMMM().format(time.toDate());
-                            return Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(doc[index].get('name'),
-                                      style: const TextStyle(
-                                          fontFamily: 'DMSans',
-                                          color: Colors.black,
-                                          fontSize: 26),
-                                      softWrap: true),
-                                ),
-                                ValueListenableBuilder(
-                                  valueListenable: imageListener,
-                                  builder: (context, value, child) {
-                                    return value
-                                        ? Stack(
-                                            alignment: Alignment.bottomRight,
-                                            children: [
-                                              InkWell(
-                                                onTap: () {
-                                                  if (Platform.isAndroid) {
-                                                    Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  CropImageTool(
-                                                                      ref: doc[
-                                                                              index]
-                                                                          .id),
-                                                            ))
-                                                        .then((value) => {
-                                                              imageListener
-                                                                  .value = true
-                                                            });
-                                                  }
-                                                  if (Platform.isIOS) {
-                                                    Navigator.push(
-                                                            context,
-                                                            CupertinoPageRoute(
-                                                              builder: (context) =>
-                                                                  CropImageTool(
-                                                                      ref: doc[
-                                                                              index]
-                                                                          .id),
-                                                            ))
-                                                        .then((value) => {
-                                                              imageListener
-                                                                  .value = true
-                                                            });
-                                                  }
-                                                },
-                                                child: CircleAvatar(
-                                                  backgroundColor:
-                                                      const Color(0XFFfffbf0),
-                                                  foregroundImage: NetworkImage(
-                                                      doc[index].get(
-                                                          'profileImageLink')),
-                                                  maxRadius:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .height /
-                                                          12,
-                                                ),
-                                              ),
-                                              const CircleAvatar(
-                                                child: Icon(
-                                                  Icons.camera_alt_rounded,
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        : Stack(
-                                            alignment: Alignment.bottomRight,
-                                            children: [
-                                              InkWell(
-                                                onTap: () {
-                                                  if (Platform.isAndroid) {
-                                                    Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  CropImageTool(
-                                                                      ref: doc[
-                                                                              index]
-                                                                          .id),
-                                                            ))
-                                                        .then((value) => {
-                                                              imageListener
-                                                                  .value = true
-                                                            });
-                                                  }
-                                                  if (Platform.isIOS) {
-                                                    Navigator.push(
-                                                            context,
-                                                            CupertinoPageRoute(
-                                                              builder: (context) =>
-                                                                  CropImageTool(
-                                                                      ref: doc[
-                                                                              index]
-                                                                          .id),
-                                                            ))
-                                                        .then((value) => {
-                                                              imageListener
-                                                                  .value = true
-                                                            });
-                                                  }
-                                                },
-                                                child: CircleAvatar(
-                                                  backgroundColor:
-                                                      Colors.orange.shade200,
-                                                  maxRadius: 50,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(8.0),
-                                                    child: Image.asset(
-                                                        'assets/logo.png'),
+                            return SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(doc[index].get('name'),
+                                        style: const TextStyle(
+                                            fontFamily: 'DMSans',
+                                            color: Colors.black,
+                                            fontSize: 26),
+                                        softWrap: true),
+                                  ),
+                                  ValueListenableBuilder(
+                                    valueListenable: imageListener,
+                                    builder: (context, value, child) {
+                                      return value
+                                          ? Stack(
+                                              alignment: Alignment.bottomRight,
+                                              children: [
+                                                InkWell(
+                                                  onTap: () {
+                                                    if (Platform.isAndroid) {
+                                                      Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    CropImageTool(
+                                                                        ref: doc[
+                                                                                index]
+                                                                            .id),
+                                                              ))
+                                                          .then((value) => {
+                                                                imageListener
+                                                                    .value = true
+                                                              });
+                                                    }
+                                                    if (Platform.isIOS) {
+                                                      Navigator.push(
+                                                              context,
+                                                              CupertinoPageRoute(
+                                                                builder: (context) =>
+                                                                    CropImageTool(
+                                                                        ref: doc[
+                                                                                index]
+                                                                            .id),
+                                                              ))
+                                                          .then((value) => {
+                                                                imageListener
+                                                                    .value = true
+                                                              });
+                                                    }
+                                                  },
+                                                  child: CircleAvatar(
+                                                    backgroundColor:
+                                                        const Color(0XFFfffbf0),
+                                                    foregroundImage: NetworkImage(
+                                                        doc[index].get(
+                                                            'profileImageLink')),
+                                                    maxRadius:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height /
+                                                            12,
                                                   ),
                                                 ),
-                                              ),
-                                              const Icon(
-                                                Icons.camera_alt_rounded,
-                                              )
-                                            ],
-                                          );
-                                  },
-                                ),
-                                const Text('Joined Since',
-                                    style: TextStyle(
-                                        fontFamily: 'DMSans',
-                                        color: Colors.black54,
-                                        fontSize: 16),
-                                    softWrap: true),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(date,
-                                      style: const TextStyle(
+                                                const CircleAvatar(
+                                                  child: Icon(
+                                                    Icons.camera_alt_rounded,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          : Stack(
+                                              alignment: Alignment.bottomRight,
+                                              children: [
+                                                InkWell(
+                                                  onTap: () {
+                                                    if (Platform.isAndroid) {
+                                                      Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    CropImageTool(
+                                                                        ref: doc[
+                                                                                index]
+                                                                            .id),
+                                                              ))
+                                                          .then((value) => {
+                                                                imageListener
+                                                                    .value = true
+                                                              });
+                                                    }
+                                                    if (Platform.isIOS) {
+                                                      Navigator.push(
+                                                              context,
+                                                              CupertinoPageRoute(
+                                                                builder: (context) =>
+                                                                    CropImageTool(
+                                                                        ref: doc[
+                                                                                index]
+                                                                            .id),
+                                                              ))
+                                                          .then((value) => {
+                                                                imageListener
+                                                                    .value = true
+                                                              });
+                                                    }
+                                                  },
+                                                  child: CircleAvatar(
+                                                    backgroundColor:
+                                                        Colors.orange.shade200,
+                                                    maxRadius: 50,
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(8.0),
+                                                      child: Image.asset(
+                                                          'assets/logo.png'),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const Icon(
+                                                  Icons.camera_alt_rounded,
+                                                )
+                                              ],
+                                            );
+                                    },
+                                  ),
+                                  const Text('Joined Since',
+                                      style: TextStyle(
                                           fontFamily: 'DMSans',
-                                          color: Colors.black,
-                                          fontSize: 18),
+                                          color: Colors.black54,
+                                          fontSize: 16),
                                       softWrap: true),
-                                ),
-                                Text('Rs.${doc[index].get('sportistanCredit')}',
-                                    style: const TextStyle(
-                                        fontFamily: "DMSans",
-                                        fontSize: 28,
-                                        color: Colors.green,
-                                        fontWeight: FontWeight.bold)),
-                                CupertinoButton(
-                                    borderRadius: BorderRadius.zero,
-                                    color: Colors.indigo,
-                                    onPressed: () {
-                                      PageRouter.push(
-                                          context, const SportistanCredit());
-                                    },
-                                    child: const Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsets.only(right: 8.0),
-                                          child: Icon(
-                                            Icons.account_balance_wallet,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        Text('View My Wallet',
-                                            style:
-                                                TextStyle(fontFamily: "DMSans")),
-                                      ],
-                                    )),
-                                SizedBox(
-                                  height: MediaQuery.of(context).size.height / 25,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text('Turn Off Notifications',
-                                          style: TextStyle(
-                                              fontFamily: "DMSans",
-                                              color: Colors.black54,
-                                              fontSize: 20)),
-                                      ValueListenableBuilder(
-                                        valueListenable: notificationListenable,
-                                        builder: (context, value, child) {
-                                          return CupertinoSwitch(
-                                            value: value,
-                                            onChanged: (v) {
-                                              notificationListenable.value = v;
-                                            },
-                                          );
-                                        },
-                                      )
-                                    ],
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(date,
+                                        style: const TextStyle(
+                                            fontFamily: 'DMSans',
+                                            color: Colors.black,
+                                            fontSize: 18),
+                                        softWrap: true),
                                   ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('Language',
-                                          style: TextStyle(
-                                              fontFamily: "DMSans",
-                                              color: Colors.black54,
-                                              fontSize: 20)),
-                                      Text('English',
-                                          style: TextStyle(
-                                              fontFamily: "DMSans",
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black54,
-                                              fontSize: 20)),
-                                    ],
-                                  ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('Country',
-                                          style: TextStyle(
-                                              fontFamily: "DMSans",
-                                              color: Colors.black54,
-                                              fontSize: 20)),
-                                      Text('India',
-                                          style: TextStyle(
-                                              fontFamily: "DMSans",
-                                              color: Colors.black54,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20)),
-                                    ],
-                                  ),
-                                ),
-                                CupertinoButton(
-                                    borderRadius: BorderRadius.zero,
-                                    color: Colors.white,
-                                    onPressed: () {
-                                      pc.open();
-                                    },
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Icon(
-                                          Icons.settings,
-                                          color: Colors.black,
-                                        ),
-                                        Text('Change Number',
-                                            style: TextStyle(
-                                              fontFamily: "DMSans",
-                                              color: Colors.black,
-                                            )),
-                                      ],
-                                    )),
-                                CupertinoButton(
-                                    borderRadius: BorderRadius.zero,
-                                    color: Colors.white,
-                                    onPressed: () {
-                                      Platform.isIOS
-                                          ? _launchUniversalLinkIos(toLaunch)
-                                          : _launchInBrowser(toLaunch);
-                                    },
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Icon(
-                                          Icons.lock,
-                                          color: Colors.black,
-                                        ),
-                                        Text('Privacy Policy',
-                                            style: TextStyle(
-                                                fontFamily: "DMSans",
-                                                color: Colors.black)),
-                                      ],
-                                    )),
-                                CupertinoButton(
-                                    borderRadius: BorderRadius.zero,
-                                    color: Colors.white,
-                                    onPressed: () {
-                                      shareApp();
-                                    },
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Icon(
-                                          Icons.send,
+                                  Text('Rs.${doc[index].get('sportistanCredit')}',
+                                      style: const TextStyle(
+                                          fontFamily: "DMSans",
+                                          fontSize: 28,
                                           color: Colors.green,
-                                        ),
-                                        Text('Share App',
+                                          fontWeight: FontWeight.bold)),
+                                  CupertinoButton(
+                                      borderRadius: BorderRadius.zero,
+                                      color: Colors.indigo,
+                                      onPressed: () {
+                                        PageRouter.push(
+                                            context, const SportistanCredit());
+                                      },
+                                      child: const Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.only(right: 8.0),
+                                            child: Icon(
+                                              Icons.account_balance_wallet,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          Text('View My Wallet',
+                                              style:
+                                                  TextStyle(fontFamily: "DMSans")),
+                                        ],
+                                      )),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height / 25,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text('Turn Off Notifications',
                                             style: TextStyle(
                                                 fontFamily: "DMSans",
-                                                color: Colors.green)),
+                                                color: Colors.black54,
+                                                fontSize: 20)),
+                                        ValueListenableBuilder(
+                                          valueListenable: notificationListenable,
+                                          builder: (context, value, child) {
+                                            return CupertinoSwitch(
+                                              value: value,
+                                              onChanged: (v) {
+                                                notificationListenable.value = v;
+                                              },
+                                            );
+                                          },
+                                        )
                                       ],
-                                    )),
-                              ],
+                                    ),
+                                  ),
+                                  const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('Language',
+                                            style: TextStyle(
+                                                fontFamily: "DMSans",
+                                                color: Colors.black54,
+                                                fontSize: 20)),
+                                        Text('English',
+                                            style: TextStyle(
+                                                fontFamily: "DMSans",
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black54,
+                                                fontSize: 20)),
+                                      ],
+                                    ),
+                                  ),
+                                  const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('Country',
+                                            style: TextStyle(
+                                                fontFamily: "DMSans",
+                                                color: Colors.black54,
+                                                fontSize: 20)),
+                                        Text('India',
+                                            style: TextStyle(
+                                                fontFamily: "DMSans",
+                                                color: Colors.black54,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20)),
+                                      ],
+                                    ),
+                                  ),
+                                  CupertinoButton(
+                                      borderRadius: BorderRadius.zero,
+                                      color: Colors.white,
+                                      onPressed: () {
+                                        pc.open();
+                                      },
+                                      child: const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Icon(
+                                            Icons.call,
+                                            color: Colors.black,
+                                          ),
+                                          Text('Change Number',
+                                              style: TextStyle(
+                                                fontFamily: "DMSans",
+                                                color: Colors.black,
+                                              )),
+                                        ],
+                                      )),
+                                  CupertinoButton(
+                                      borderRadius: BorderRadius.zero,
+                                      color: Colors.white,
+                                      onPressed: () {
+                                        Platform.isIOS
+                                            ? _launchUniversalLinkIos(toLaunch)
+                                            : _launchInBrowser(toLaunch);
+                                      },
+                                      child: const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Icon(
+                                            Icons.lock,
+                                            color: Colors.black,
+                                          ),
+                                          Text('Privacy Policy',
+                                              style: TextStyle(
+                                                  fontFamily: "DMSans",
+                                                  color: Colors.black)),
+                                        ],
+                                      )),
+                                  CupertinoButton(
+                                      borderRadius: BorderRadius.zero,
+                                      color: Colors.white,
+                                      onPressed: () {
+                                        shareApp();
+                                      },
+                                      child: const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Icon(
+                                            Icons.send,
+                                            color: Colors.black,
+                                          ),
+                                          Text('Share App',
+                                              style: TextStyle(
+                                                  fontFamily: "DMSans",
+                                                  color: Colors.black)),
+                                        ],
+                                      )),
+                                ],
+                              ),
                             );
                           },
                         )
@@ -510,7 +520,7 @@ class _NavProfileState extends State<NavProfile> {
                         child: const Icon(Icons.edit)),
                     fillColor: Colors.white,
                     border: InputBorder.none,
-                    errorStyle: const TextStyle(color: Colors.white),
+                    errorStyle: const TextStyle(color: Colors.red),
                     filled: true,
                     prefixIcon: CountryCodePicker(
                       showCountryOnly: true,
@@ -637,43 +647,6 @@ class _NavProfileState extends State<NavProfile> {
     );
   }
 
-  Future<void> _verifyNumberForDelete({required String number}) async {
-    await _auth.verifyPhoneNumber(
-      phoneNumber: number,
-      verificationCompleted: (PhoneAuthCredential credential) async {},
-      verificationFailed: (FirebaseAuthException e) {
-        if (e.code == 'invalid-phone-number') {
-          buttonDisable.value = false;
-
-          _showError("'The provided phone number is not valid.'");
-        } else {
-          buttonDisable.value = false;
-
-          _showError(e.message.toString());
-        }
-      },
-      codeSent: (String verificationId, int? resendToken) async {
-        finalVerification = verificationId;
-      },
-      timeout: const Duration(seconds: 0),
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
-  }
-
-  Future<void> _manualVerifyNumberForDelete(String smsCode) async {
-    PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: finalVerification.toString(), smsCode: smsCode);
-    try {
-      buttonDisable.value = true;
-      await _auth
-          .signInWithCredential(credential)
-          .then((value) => {deleteKYC()});
-    } on FirebaseAuthException catch (e) {
-      buttonDisable.value = false;
-
-      _showError(e.message.toString());
-    }
-  }
 
   Future<void> _manualVerify(String smsCode) async {
     PhoneAuthCredential credential = PhoneAuthProvider.credential(
@@ -723,12 +696,5 @@ class _NavProfileState extends State<NavProfile> {
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
   }
-
-  _callNumber() async {
-    const number = '+918591719905'; //set the number here
-    FlutterPhoneDirectCaller.callNumber(number);
-  }
-
-
 
 }

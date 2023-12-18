@@ -32,9 +32,6 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
-//pro guard rules pending for paytm (optional)
-//-keep class com.paytm.pgsdk.model.ProcessTransactionInfo { *; }
-//-keep class com.paytm.pgsdk.model.Body { *; }
 
 android {
     compileSdkVersion flutter.compileSdkVersion

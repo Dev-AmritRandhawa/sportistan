@@ -158,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage>
       body: SafeArea(
         child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(),
               SizedBox(
@@ -174,7 +174,6 @@ class _MyHomePageState extends State<MyHomePage>
                   },
                 ),
               ),
-
             ],
           ),
         ),
