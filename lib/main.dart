@@ -1,23 +1,23 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sportistan/nav/home.dart';
-import 'package:sportistan/nav/nav_home.dart';
-import 'package:sportistan/onboarding/onboarding.dart';
+import 'package:sportistan/widgets/errors.dart';
 import 'package:sportistan/widgets/local_notifications.dart';
 import 'package:sportistan/widgets/page_route.dart';
-import 'package:sportistan/widgets/permission_check.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'authentication/authentication.dart';
 import 'firebase_options.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-
+import 'nav/nav_home.dart';
+import 'onboarding/onboarding.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -48,16 +48,18 @@ Future<void> registerFCM() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 }
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   await FirebaseAppCheck.instance.activate(
-      androidProvider: AndroidProvider.debug,
-      appleProvider: AppleProvider.debug);
+      androidProvider: AndroidProvider.playIntegrity,
+      appleProvider: AppleProvider.appAttest);
+  initializeDateFormatting('en', '').then((value) => null);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     requestPermission();
+
     runApp(const MaterialApp(home: MyApp()));
   });
 }
@@ -67,8 +69,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
+    return MaterialApp(
       theme: ThemeData.light(useMaterial3: false),
+      themeMode: ThemeMode.light,
       home: const MyHomePage(),
     );
   }
@@ -85,6 +88,11 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
+  final _auth = FirebaseAuth.instance;
+
+  final _server = FirebaseFirestore.instance;
+
+  bool isAccountOnHold = false;
 
   @override
   void initState() {
@@ -97,40 +105,48 @@ class _MyHomePageState extends State<MyHomePage>
     _controller.dispose();
     super.dispose();
   }
-  Future<void> getLocationPermission() async {
-    PermissionStatus permissionStatus;
-    try {
-      permissionStatus = await Permission.location.request();
-      if (permissionStatus == PermissionStatus.granted ||
-          permissionStatus == PermissionStatus.limited) {
-        if(mounted){
-          PageRouter.pushRemoveUntil(context, const Home());
-        }
-      }
-     else if (permissionStatus == PermissionStatus.denied) {
-        if(mounted){
-        PageRouter.pushRemoveUntil(context, const PermissionCheck(result: false,));
-        }
-      }   else if (permissionStatus == PermissionStatus.permanentlyDenied) {
-        if(mounted){
-          PageRouter.pushRemoveUntil(context, const PermissionCheck(result: true,));
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
-      }
-    }
-  }
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback(
-            (_) => Future.delayed(const Duration(milliseconds: 3500), () async {
-          FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+            (_) => Future.delayed(const Duration(milliseconds: 3000), () async {
+          _auth.authStateChanges().listen((User? user) async {
             if (user != null) {
-              PageRouter.pushRemoveUntil(context, const NavHome());
-
+              try {
+                _server
+                    .collection("SportistanUsers")
+                    .where('userID', isEqualTo: _auth.currentUser!.uid)
+                    .get()
+                    .then((value) => {
+                  if (value.docChanges.isEmpty)
+                    {
+                      if (mounted)
+                        {
+                          PageRouter.pushRemoveUntil(
+                              context, const PhoneAuthentication())
+                        }
+                    }
+                  else
+                    {
+                      if (mounted)
+                        {
+                          PageRouter.pushRemoveUntil(
+                              context,
+                              BeforeHome(
+                                value: value,
+                              ))
+                        }
+                    }
+                });
+              } on SocketException catch (e) {
+                if (mounted) {
+                  Errors.flushBarInform(
+                      e.message, context, "Connectivity Error");
+                }
+                _userStateSave();
+              } catch (e) {
+                _userStateSave();
+              }
             } else {
               _userStateSave();
             }
@@ -144,8 +160,9 @@ class _MyHomePageState extends State<MyHomePage>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
+              Container(),
               SizedBox(
-                height: MediaQuery.of(context).size.height / 5,
+                height: MediaQuery.of(context).size.height / 4,
                 width: MediaQuery.of(context).size.width / 2,
                 child: Lottie.asset(
                   'assets/loading.json',
@@ -157,6 +174,7 @@ class _MyHomePageState extends State<MyHomePage>
                   },
                 ),
               ),
+
             ],
           ),
         ),
@@ -181,6 +199,89 @@ class _MyHomePageState extends State<MyHomePage>
       }
     } else {
       _moveToDecision(const OnBoard());
+    }
+  }
+}
+
+class BeforeHome extends StatefulWidget {
+  const BeforeHome({super.key, required this.value});
+
+  final QuerySnapshot<Map<String, dynamic>> value;
+
+  @override
+  State<BeforeHome> createState() => _BeforeHomeState();
+}
+
+class _BeforeHomeState extends State<BeforeHome> {
+  bool accountOnHold = false;
+  ValueNotifier<bool> accountOnHoldListener = ValueNotifier<bool>(false);
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback(
+            (_) => Future.delayed(const Duration(milliseconds: 3500), () async {
+          if (mounted) {
+            checkHealth();
+          }
+        }));
+    return Scaffold(
+        body: ValueListenableBuilder(
+          valueListenable: accountOnHoldListener,
+          builder: (context, value, child) => value
+              ? Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text("Your Account is On Hold",
+                    style: TextStyle(
+                      fontFamily: "DMSans",
+                      fontSize: 22,
+                    ),
+                    softWrap: true),
+              ),
+              Icon(Icons.warning,
+                  color: Colors.red,
+                  size: MediaQuery.of(context).size.height / 5),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                    "Your Account is On Hold Due to Some Reasons Please Contact Customer Support if You Think This is a Mistake Write an Email Support@Sportistan.co.in or Call +918591719905",
+                    style: TextStyle(fontFamily: "DMSans", fontSize: 16),
+                    softWrap: true),
+              ),
+            ],
+          )
+              : const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    strokeWidth: 1,
+                    color: Colors.green,
+                  )
+                ],
+              )),
+        ));
+  }
+
+  void checkHealth() {
+    for (int i = 0; i < widget.value.docChanges.length; i++) {
+      if (widget.value.docChanges[i].doc.get('isAccountOnHold')) {
+        accountOnHold = true;
+        accountOnHoldListener.value = true;
+        break;
+      } else {
+        continue;
+      }
+    }
+    if (!accountOnHold) {
+      PageRouter.pushRemoveUntil(context, const NavHome());
     }
   }
 }

@@ -13,19 +13,17 @@ import 'package:sportistan/nav/nav_home.dart';
 import 'package:sportistan/widgets/page_route.dart';
 
 
-class BookingInfo extends StatefulWidget {
+class BookingEntireDayInfo extends StatefulWidget {
   final String bookingID;
 
-  const BookingInfo({super.key, required this.bookingID});
+  const BookingEntireDayInfo({super.key, required this.bookingID});
 
   @override
-  State<BookingInfo> createState() => _BookingInfoState();
+  State<BookingEntireDayInfo> createState() => _BookingEntireDayInfoState();
 }
 
-class _BookingInfoState extends State<BookingInfo> {
+class _BookingEntireDayInfoState extends State<BookingEntireDayInfo> {
   String? bookingType;
-
-  String? refDetails;
 
   String? userID;
   String? groundName;
@@ -33,8 +31,6 @@ class _BookingInfoState extends State<BookingInfo> {
   String? token;
 
   String? date;
-
-  String? slotTime;
 
   @override
   void dispose() {
@@ -53,8 +49,8 @@ class _BookingInfoState extends State<BookingInfo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.white,foregroundColor: Colors.black),
-
+      appBar:
+      AppBar(backgroundColor: Colors.white, foregroundColor: Colors.black),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -73,10 +69,8 @@ class _BookingInfoState extends State<BookingInfo> {
                     itemBuilder: (context, index) {
                       DocumentSnapshot doc = snapshot.data!.docs[index];
                       bookingType = doc['bookingPerson'];
-                      refDetails = doc.id;
                       userID = doc['userID'];
                       groundName = doc['groundName'];
-                      slotTime = doc['slotTime'];
 
                       Timestamp time = doc['bookedAt'];
 
@@ -84,6 +78,8 @@ class _BookingInfoState extends State<BookingInfo> {
                       date = DateFormat.MMMMEEEEd().format(day.toDate());
                       DateTime booked = time.toDate();
                       bool isTeamBAvailable = doc["bothTeamBooked"];
+                      List<dynamic> allSlotsRef = doc['includeSlots'];
+                      String groupID = doc['groupID'];
                       return Column(
                         children: [
                           Screenshot(
@@ -92,34 +88,6 @@ class _BookingInfoState extends State<BookingInfo> {
                               color: Colors.white,
                               child: Column(
                                 children: [
-                                  Card(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            "Booking ID",
-                                            style: TextStyle(
-                                                fontFamily: "DMSans",
-                                                fontSize: MediaQuery.of(context)
-                                                    .size
-                                                    .height /
-                                                    50),
-                                          ),
-                                          Text(
-                                            doc["bookingID"],
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontFamily: "DMSans",
-                                                fontSize: MediaQuery.of(context)
-                                                    .size
-                                                    .height /
-                                                    50),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
                                   Padding(
                                     padding: EdgeInsets.only(
                                       left: MediaQuery.of(context).size.width /
@@ -157,19 +125,37 @@ class _BookingInfoState extends State<BookingInfo> {
                                       ),
                                     ],
                                   ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Text(
-                                        "Slot : ",
+                                  const Card(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Booked Slots",
+                                        style: TextStyle(fontFamily: "DMSans"),
                                       ),
-                                      Text(
-                                        doc["slotTime"],
-                                        style: const TextStyle(
-                                            fontFamily: "DMSans",
-                                            fontWeight: FontWeight.bold),
-                                      )
-                                    ],
+                                    ),
+                                  ),
+                                  const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Row(children: [Text("All Slots are Booked For a Day")],),
+                                  ),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height:
+                                    MediaQuery.of(context).size.height / 15,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      shrinkWrap: true,
+                                      itemCount: allSlotsRef.length,
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: OutlinedButton(
+                                              onPressed: null,
+                                              child: Text(allSlotsRef[index]
+                                                  .toString())),
+                                        );
+                                      },
+                                    ),
                                   ),
                                   Card(
                                     child: Padding(
@@ -197,6 +183,18 @@ class _BookingInfoState extends State<BookingInfo> {
                                       ),
                                     ),
                                   ),
+                                  const Card(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Entire Day is Booked",
+                                        style: TextStyle(
+                                            color: Colors.green,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+
                                   Padding(
                                     padding: EdgeInsets.all(
                                       MediaQuery.of(context).size.width / 20,
@@ -221,7 +219,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                         ),
                                         Row(
                                           children: [
-                                            const Text("Slot Amount : "),
+                                            const Text("Entire Day : "),
                                             Text(
                                               "Rs. ${doc["slotPrice"]}",
                                               style: const TextStyle(
@@ -236,7 +234,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Text("Fees Due : "),
+                                      const Text("Due : "),
                                       Text(
                                         "Rs. ${doc["feesDue"]}",
                                         style: TextStyle(
@@ -450,7 +448,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                               child: const Text("Share"))),
                                     ],
                                   ),
-                                  doc["isBookingCancelled"] ? Container() : Padding(
+                                  Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: CupertinoButton(
                                         onPressed: () {
@@ -474,21 +472,9 @@ class _BookingInfoState extends State<BookingInfo> {
                                               actions: [
                                                 TextButton(
                                                     onPressed: () async {
-                                                      await _server
-                                                          .collection(
-                                                          "GroundBookings")
-                                                          .doc(refDetails)
-                                                          .update({
-                                                        'isBookingCancelled':
-                                                        true
-                                                      }).then(
-                                                              (value) async =>
-                                                          {
-                                                            Navigator.pop(
-                                                                ctx),
-                                                            refundInit(
-                                                                refund: doc['bookingCommissionCharged']),
-                                                          });
+                                                      Navigator.pop(ctx);
+                                                      await cancelEntireDayBookingCancel(
+                                                          groupID);
                                                     },
                                                     child: const Text(
                                                         "Cancel Booking",
@@ -534,7 +520,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                                       fontFamily:
                                                       "DMSans")),
                                               title: const Text(
-                                                  "Cancel Booking Entire Day",
+                                                  "Cancel Booking",
                                                   style: TextStyle(
                                                       color: Colors.red,
                                                       fontFamily:
@@ -542,21 +528,9 @@ class _BookingInfoState extends State<BookingInfo> {
                                               actions: [
                                                 TextButton(
                                                     onPressed: () async {
-                                                      await _server
-                                                          .collection(
-                                                          "GroundBookings")
-                                                          .doc(refDetails)
-                                                          .update({
-                                                        'isBookingCancelled':
-                                                        true
-                                                      }).then(
-                                                              (value) async =>
-                                                          {
-                                                            Navigator.pop(
-                                                                ctx),
-                                                            refundInit(
-                                                                refund: doc['bookingCommissionCharged']),
-                                                          });
+                                                      Navigator.pop(ctx);
+                                                      await cancelEntireDayBookingCancel(
+                                                          groupID);
                                                     },
                                                     child: const Text(
                                                         "Cancel Booking",
@@ -650,20 +624,20 @@ class _BookingInfoState extends State<BookingInfo> {
   }) async {
     num sportistanCredit;
     try {
-      await _server
-          .collection("SportistanUsers")
-          .where("userID", isEqualTo: userID)
-          .get()
-          .then((value) async => {
-        sportistanCredit = value.docChanges.first.doc
-            .get('sportistanCredit'),
-        await _server
-            .collection("SportistanUsers")
-            .doc(value.docChanges.first.doc.id)
-            .update({
-          'sportistanCredit': sportistanCredit + refund
-        }).then((value) => {
-          sendNotification()})
+            await _server
+                .collection("SportistanUsers")
+                .where("userID", isEqualTo: userID)
+                .get()
+                .then((value) async => {
+              sportistanCredit = value.docChanges.first.doc
+                  .get('sportistanCredit'),
+              await _server
+                  .collection("SportistanUsers")
+                  .doc(value.docChanges.first.doc.id)
+                  .update({
+                'sportistanCredit': sportistanCredit + refund
+              }).then((value) => {
+                sendNotification()})
 
       });
     } catch (e) {
@@ -683,11 +657,34 @@ class _BookingInfoState extends State<BookingInfo> {
     final token = snapshot.docs[0].get("token");
 
     FirebaseCloudMessaging.sendPushMessage(
-        "$groundName Booking is Cancelled of Slot $slotTime and $date",
+        "$groundName Booking is Cancelled of Slot Entire Day $date",
         "Booking Cancelled",
         token);
-    if (mounted) {
-      Navigator.pop(context);
+  }
+
+  late String groundID;
+  late num refundCalculation;
+
+  Future<void> cancelEntireDayBookingCancel(String groupID) async {
+    try {
+      await _server
+          .collection("GroundBookings")
+          .where('groupID', isEqualTo: groupID)
+          .get()
+          .then((value) async => {
+        refundCalculation =
+            value.docChanges.first.doc.get("bookingCommissionCharged"),
+        for (int i = 0; i < value.size; i++)
+          {
+            await _server
+                .collection("GroundBookings")
+                .doc(value.docChanges[i].doc.id)
+                .update({'isBookingCancelled': true})
+          },
+        refundInit(refund: refundCalculation,)
+      });
+    } catch (e) {
+      return;
     }
   }
 }

@@ -1,12 +1,11 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:delayed_display/delayed_display.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
-import 'package:sportistan/widgets/errors.dart';
 
 class SportistanCredit extends StatefulWidget {
   const SportistanCredit({super.key});
@@ -38,7 +37,8 @@ class _SportistanCreditState extends State<SportistanCredit>
   final _auth = FirebaseAuth.instance;
   ValueNotifier<bool> showError = ValueNotifier<bool>(false);
   ValueNotifier<bool> loading = ValueNotifier<bool>(true);
-
+  TextEditingController addBalanceController = TextEditingController();
+  GlobalKey<FormState> addBalanceControllerKey = GlobalKey<FormState>();
   late num balance;
 
   Future<void> _checkBalance() async {
@@ -52,11 +52,13 @@ class _SportistanCreditState extends State<SportistanCredit>
                   {
                     balance =
                         value.docChanges.first.doc.get('sportistanCredit'),
+                    addBalanceController.text = '1000',
                     loading.value = false
                   }
               });
-    } on SocketException catch (e) {
+    } on SocketException {
       loading.value = false;
+
       showError.value = true;
     } catch (e) {
       loading.value = false;
@@ -68,14 +70,14 @@ class _SportistanCreditState extends State<SportistanCredit>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        title: const Text('Back'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+      body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         SafeArea(
           child: ValueListenableBuilder(
               valueListenable: loading,
@@ -98,24 +100,63 @@ class _SportistanCreditState extends State<SportistanCredit>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            'Your Balance',
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              'Sportistan',
+                              style: TextStyle(
+                                  fontFamily: "DMSans",
+                                  fontSize: 20,
+                                  color: Colors.black54),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Your Balance',
+                              style: TextStyle(
+                                  fontFamily: "DMSans",
+                                  fontSize:
+                                      MediaQuery.of(context).size.height / 20,
+                                  color: Colors.black54),
+                            ),
+                          ),
+                          Text(
+                            "Rs.$balance",
                             style: TextStyle(
                                 fontFamily: "DMSans",
-                                fontSize: 20,color: Colors.black54),
-                          ),Text(
-                            balance.toString(),
-                            style: const TextStyle(
-                                fontFamily: "DMSans",
-                                fontSize: 22,
-                                fontWeight: FontWeight.w500),
+                                fontSize:
+                                    MediaQuery.of(context).size.height / 20,
+                                fontWeight: FontWeight.w500,
+                                color: balance < 10
+                                    ? Colors.redAccent
+                                    : Colors.green),
                           ),
-                          CupertinoButton(
-                              color: Colors.green.shade900,
-                              onPressed: (){
-
-                          }, child: const Text('Add More Credits')),
-
+                          Form(
+                              key: addBalanceControllerKey,
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width / 1.5,
+                                child: TextFormField(
+                                  cursorColor: Colors.black54,
+                                  controller: addBalanceController,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  keyboardType: TextInputType.number,
+                                  validator: (value) {
+                                    if (num.parse(value.toString()) > 50000 ||
+                                        num.parse(value.toString()) <= 0) {
+                                      return 'Enter Minimum Rs.1 to Maximum Rs.50000';
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  decoration: const InputDecoration(prefixIcon: Icon(Icons.add),
+                                      border: OutlineInputBorder(),
+                                      filled: true,
+                                      fillColor: Colors.white),
+                                ),
+                              ))
                         ],
                       ),
                     )),
@@ -156,6 +197,22 @@ class _SportistanCreditState extends State<SportistanCredit>
               ..forward();
           },
         ),
+        CupertinoButton(
+            color: Colors.green.shade900,
+            onPressed: () {
+              if (addBalanceControllerKey.currentState!.validate()) {
+
+              }
+            },
+            child: const Text('Add Credits')),
+        const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            "Your Payment is 100% Secure",
+            style: TextStyle(
+                fontFamily: "DMSans", fontSize: 20, color: Colors.black54),
+          ),
+        )
       ]),
     );
   }

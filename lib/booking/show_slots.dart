@@ -10,9 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sportistan/booking/book_entire_day.dart';
 import 'package:sportistan/nav/nav_home.dart';
 import 'package:sportistan/widgets/page_route.dart';
-
 import 'book_a_slot.dart';
-import 'booking_info.dart';
 
 class ShowSlots extends StatefulWidget {
   final String groundID;
@@ -659,7 +657,7 @@ class _ShowSlotsState extends State<ShowSlots> {
                                           BookEntireDay(
                                             date: group,
                                             groundID:
-                                            widget.groundID,
+                                            widget.groundID, groundName: widget.groundName,
                                           ),
                                     ))
                                     .then((value) =>
@@ -673,7 +671,7 @@ class _ShowSlotsState extends State<ShowSlots> {
                                           BookEntireDay(
                                             date: group,
                                             groundID:
-                                            widget.groundID,
+                                            widget.groundID, groundName: widget.groundName,
                                           ),
                                     ))
                                     .then((value) =>

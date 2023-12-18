@@ -55,7 +55,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
   }
 
   final Uri toLaunch = Uri(
-      scheme: 'https/', host: 'www.sportistan.co.in', path: '/');
+      scheme: 'https', host: 'www.sportistan.co.in', path: '/');
 
   @override
   void dispose() {
@@ -567,6 +567,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
         'accountCreatedAt': DateTime.now(),
         'rating': 3.0,
         'ratingTags': [],
+        'profileImageLink' : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
         'sportistanCredit' : 50,
         'name': nameController.value.text.toString(),
         'isAccountOnHold': false,

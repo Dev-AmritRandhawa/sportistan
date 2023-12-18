@@ -1,16 +1,33 @@
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:intl/intl.dart';
+import 'package:sportistan/booking/payment_mode.dart';
+import 'package:sportistan/booking/unique.dart';
+
+import '../payment/sportistan_credit.dart';
+import '../widgets/errors.dart';
+import '../widgets/page_route.dart';
+import 'book_a_slot.dart';
+import 'booking_entire_day_info.dart';
 
 class BookEntireDay extends StatefulWidget {
   final String date;
-
   final String groundID;
+  final String groundName;
 
-  const BookEntireDay({super.key, required this.date, required this.groundID});
+  const BookEntireDay(
+      {super.key,
+        required this.date,
+        required this.groundID,
+        required this.groundName});
 
   @override
   State<BookEntireDay> createState() => _BookEntireDayState();
@@ -18,12 +35,19 @@ class BookEntireDay extends StatefulWidget {
 
 class _BookEntireDayState extends State<BookEntireDay> {
   final _server = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
 
   List finalAvailabilityList = [];
 
   ValueNotifier<bool> listShow = ValueNotifier<bool>(false);
+  ValueNotifier<bool> switchBuilder = ValueNotifier<bool>(false);
+  ValueNotifier<bool> amountUpdater = ValueNotifier<bool>(false);
+  TextEditingController advancePaymentController = TextEditingController();
+  GlobalKey<FormState> advancePaymentKey = GlobalKey<FormState>();
 
-  int total = 0;
+  late List<DocumentChange<Map<String, dynamic>>> data;
+
+  bool updateSmsAlert = true;
 
   @override
   void initState() {
@@ -31,34 +55,58 @@ class _BookEntireDayState extends State<BookEntireDay> {
     super.initState();
   }
 
-  List daySlots = [];
-  TextEditingController priceController = TextEditingController();
-  GlobalKey<FormState> priceKey = GlobalKey<FormState>();
+  @override
+  void dispose() {
+    teamControllerA.dispose();
+    numberControllerA.dispose();
+    notesTeamA.dispose();
+    nameControllerA.dispose();
+    super.dispose();
+  }
+
+  TextEditingController teamControllerA = TextEditingController();
+  TextEditingController numberControllerA = TextEditingController();
+  TextEditingController nameControllerA = TextEditingController();
+  GlobalKey<FormState> nameKeyA = GlobalKey<FormState>();
+  GlobalKey<FormState> numberKeyA = GlobalKey<FormState>();
+  GlobalKey<FormState> teamControllerKeyA = GlobalKey<FormState>();
+  TextEditingController notesTeamA = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: CupertinoButton(
-          borderRadius: BorderRadius.zero,
-          color: Colors.green,
-          onPressed: (){
-
-          }, child: const Text("Create Booking")),
-      appBar: AppBar(foregroundColor: Colors.black54,backgroundColor: Colors.white,elevation: 0
-          ,title: const Text("Book for Entire Day")
-      ),
-      body: SafeArea(
-          child: ValueListenableBuilder(
-            valueListenable: listShow,
-            builder: (context, value, child) {
-              return value
-                  ? dataList()
-                  : const Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 1,
-                  ));
-            },
-          )),
-    );
+        appBar: AppBar(
+            foregroundColor: Colors.black54,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: const Text("Book for Entire Day")),
+        body: SafeArea(
+            child: ValueListenableBuilder(
+              valueListenable: listShow,
+              builder: (context, value, child) {
+                return value
+                    ? SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      const Text("Entire Day Price",
+                          style:
+                          TextStyle(fontSize: 16, fontFamily: "DMSans")),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Rs.${entireDayAmount.toString()}',
+                            style: const TextStyle(fontSize: 24)),
+                      ),
+                      dataList()
+                    ],
+                  ),
+                )
+                    : const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1,
+                    ));
+              },
+            )));
   }
 
   dataList() {
@@ -67,8 +115,8 @@ class _BookEntireDayState extends State<BookEntireDay> {
     }
 
     Map groupedItems = groupItemsByCategory(finalAvailabilityList);
+
     return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
           ListView.builder(
@@ -100,6 +148,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
                         itemCount: bookingGroup.length,
                         itemBuilder: (context, index) {
                           MySlots bookings = bookingGroup[index];
+
                           return Padding(
                               padding: const EdgeInsets.only(left: 2, right: 2),
                               child: Column(
@@ -111,7 +160,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
                                       side: const BorderSide(
                                           color: Colors.green, width: 2),
                                     ),
-                                    onPressed: () {},
+                                    onPressed: null,
                                     child: Text(
                                       bookings.slotTime,
                                       style: TextStyle(
@@ -122,32 +171,6 @@ class _BookEntireDayState extends State<BookEntireDay> {
                                               30),
                                     ),
                                   ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "Slot ${index + 1} :",
-                                        style: TextStyle(
-                                            fontSize: MediaQuery.of(context)
-                                                .size
-                                                .width /
-                                                38,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black54,
-                                            fontFamily: "DMSans"),
-                                      ),
-                                      Text(
-                                        bookings.slotPrice.toString(),
-                                        style: TextStyle(
-                                            fontSize: MediaQuery.of(context)
-                                                .size
-                                                .width /
-                                                38,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black54,
-                                            fontFamily: "DMSans"),
-                                      ),
-                                    ],
-                                  ),
                                 ],
                               ));
                         }),
@@ -156,124 +179,544 @@ class _BookEntireDayState extends State<BookEntireDay> {
               );
             },
           ),
-          ValueListenableBuilder(
-            valueListenable: listShow,
-            builder: (context, value, child) {
-              listShow.value = true;
-              return value
-                  ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Card(
-                      child: Padding(
+          Column(
+            children: <Widget>[
+              SizedBox(
+                width: double.infinity,
+                child: Card(
+                  color: Colors.grey.shade100,
+                  child: Column(
+                    children: [
+                      Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("Amount to pay for entire day \nRs.${total.toString()}",
-                            style: const TextStyle(
-                                fontSize: 22, fontFamily: "DMSans")),
-                      )),
-                ],
-              )
-                  : Container();
-            },
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Form(
-              key: priceKey,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width / 1.2,
-                child: TextFormField(
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return "Team name required.";
-                    } else if (value.length <= 2) {
-                      return "Enter Correct Name.";
-                    } else {
-                      return null;
-                    }
-                  },
-                  controller: priceController,
-                  onChanged: (data) {
-                    priceKey.currentState!.validate();
-                  },
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                      fillColor: Colors.white,
-                      border: InputBorder.none,
-                      errorStyle: TextStyle(color: Colors.white),
-                      labelText: "Amount*",
-                      filled: true,
-                      labelStyle: TextStyle(color: Colors.black)),
+                        child: Form(
+                          key: teamControllerKeyA,
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width / 1.2,
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "Team name required.";
+                                } else if (value.length <= 2) {
+                                  return "Enter Correct Name.";
+                                } else {
+                                  return null;
+                                }
+                              },
+                              controller: teamControllerA,
+                              onChanged: (data) {
+                                nameKeyA.currentState!.validate();
+                              },
+                              decoration: const InputDecoration(
+                                  fillColor: Colors.white,
+                                  border: InputBorder.none,
+                                  errorStyle: TextStyle(color: Colors.red),
+                                  labelText: "Team Name*",
+                                  filled: true,
+                                  labelStyle: TextStyle(color: Colors.black)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Form(
+                          key: nameKeyA,
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width / 1.2,
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "Name required.";
+                                } else if (value.length <= 2) {
+                                  return "Enter Correct Name.";
+                                } else {
+                                  return null;
+                                }
+                              },
+                              controller: nameControllerA,
+                              onChanged: (data) {
+                                nameKeyA.currentState!.validate();
+                              },
+                              decoration: const InputDecoration(
+                                  fillColor: Colors.white,
+                                  labelText: "Contact Person*",
+                                  border: InputBorder.none,
+                                  errorStyle: TextStyle(color: Colors.red),
+                                  filled: true,
+                                  labelStyle: TextStyle(color: Colors.black)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Form(
+                          key: numberKeyA,
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width / 1.2,
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "Number required.";
+                                } else if (value.length <= 9) {
+                                  return "Enter 10 digits.";
+                                } else {
+                                  return null;
+                                }
+                              },
+                              controller: numberControllerA,
+                              onChanged: (data) {
+                                numberKeyA.currentState!.validate();
+                              },
+                              keyboardType: TextInputType.phone,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              autofillHints: const [
+                                AutofillHints.telephoneNumberLocal
+                              ],
+                              decoration: InputDecoration(
+                                  prefixIcon: IconButton(
+                                      onPressed: () {
+                                        checkPermissionForContacts(
+                                            numberControllerA);
+                                      },
+                                      icon: const Icon(Icons.contacts,
+                                          color: Colors.blue)),
+                                  fillColor: Colors.white,
+                                  border: InputBorder.none,
+                                  errorStyle:
+                                  const TextStyle(color: Colors.red),
+                                  filled: true,
+                                  labelText: "Contact Number*",
+                                  labelStyle:
+                                  const TextStyle(color: Colors.black)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 2,
+                        child: Form(
+                          key: advancePaymentKey,
+                          child: TextFormField(
+                            controller: advancePaymentController,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                Errors.flushBarInform(
+                                    "Advance Amount is Missing",
+                                    context,
+                                    "Error");
+                                return "Enter Advance";
+                              } else if (int.parse(
+                                  advancePaymentController.value.text) >
+                                  double.parse(entireDayAmount!)
+                                      .toDouble()
+                                      .round()
+                                      .toInt()) {
+                                return "Invalid Amount";
+                              } else {
+                                return null;
+                              }
+                            },
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            autofillHints: const [
+                              AutofillHints.telephoneNumberLocal
+                            ],
+                            decoration: const InputDecoration(
+                              fillColor: Colors.white,
+                              border: InputBorder.none,
+                              errorStyle: TextStyle(color: Colors.red),
+                              filled: true,
+                              label: Text("Advance if received?"),
+                              hintText: "Booking Amt?",
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          child: TextFormField(
+                            controller: notesTeamA,
+                            decoration: const InputDecoration(
+                              fillColor: Colors.white,
+                              border: InputBorder.none,
+                              errorStyle: TextStyle(color: Colors.red),
+                              filled: true,
+                              hintText: "Notes (Optional)",
+                              hintStyle: TextStyle(color: Colors.black45),
+                              contentPadding:
+                              EdgeInsets.symmetric(vertical: 40),
+                            ),
+                          ),
+                        ),
+                      ),
+                      ListView(
+                        physics: const BouncingScrollPhysics(),
+                        shrinkWrap: true,
+                        addAutomaticKeepAlives: true,
+                        children: <Widget>[
+                          Content(
+                            title: 'Choose Mode Of Payment',
+                            child: ChipsChoice<String>.single(
+                              value: PaymentMode.type,
+                              onChanged: (val) =>
+                                  setState(() => PaymentMode.type = val),
+                              choiceItems: C2Choice.listFrom<String, String>(
+                                source: PaymentMode.paymentOptions,
+                                value: (i, v) => v,
+                                label: (i, v) => v,
+                                tooltip: (i, v) => v,
+                              ),
+                              choiceCheckmark: true,
+                              choiceStyle: C2ChipStyle.filled(
+                                color: Colors.blue,
+                                selectedStyle: const C2ChipStyle(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(25),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),  const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text("Would you like to update amount?",
-                style: TextStyle(
-                    fontSize: 16, fontFamily: "DMSans")),
-          ), MaterialButton(
-              elevation: 0,
-              color: Colors.green,
-              shape: RoundedRectangleBorder(
-                  borderRadius:
-                  BorderRadius.circular(
-                      25)),
-              onPressed: () {
-
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(
-                    const SnackBar(
-                      content:
-                      Text("Amount Updated"),
-                      backgroundColor: Colors.green,
-                    ));
-              },
-              child: const Text(
-                "Update Amount",
-                style: TextStyle(
-                    color: Colors.white),
-              )),
+              CupertinoButton(
+                  color: Colors.indigo,
+                  child: const Text("Book For Entire Day"),
+                  onPressed: () {
+                    if (nameKeyA.currentState!.validate() &
+                    numberKeyA.currentState!.validate() &
+                    teamControllerKeyA.currentState!.validate() &
+                    advancePaymentKey.currentState!.validate()) {
+                      if (data.isNotEmpty) {
+                        _checkBalance(data);
+                      }
+                    } else {
+                      Errors.flushBarInform(
+                          "Please Fill The Details", context, "Error");
+                    }
+                  }),
+              SizedBox(
+                height: MediaQuery.of(context).size.height / 8,
+              )
+            ],
+          ),
         ],
       ),
     );
   }
 
+  List allData = [];
+  String? entireDayAmount;
+  late num commission;
+
+  Future<void> _checkBalance(
+      List<DocumentChange<Map<String, dynamic>>> data) async {
+    num balance = data.first.doc.get("sportistanCredit");
+    num commission = data.first.doc.get("commission");
+    String groundType = data.first.doc.get("groundType");
+    double result =
+        double.parse(entireDayAmount!).toDouble().toInt().round() / 100;
+    double commissionCharge = result * commission.toInt();
+    if (commissionCharge <= balance) {
+      createBooking(
+          balance: balance,
+          commissionCharge: commissionCharge,
+          keepBalance: balance,
+          groundType: groundType);
+    } else {
+      showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Low Balance",
+                    style: TextStyle(
+                        fontFamily: "DMSans", fontSize: 22, color: Colors.red),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Not Able to create booking due to low balance",
+                    style: TextStyle(fontFamily: "DMSans", fontSize: 16),
+                  ),
+                ),
+                Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        widget.groundName,
+                        softWrap: true,
+                        style: const TextStyle(fontFamily: "DMSans", fontSize: 16),
+                      ),
+                    )),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Rs.',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text(
+                      balance.toString(),
+                      style: const TextStyle(
+                          fontSize: 50, color: Colors.redAccent),
+                    ),
+                  ],
+                ),
+                CupertinoButton(
+                    color: Colors.green,
+                    child: const Text("Add Credits"),
+                    onPressed: () {
+                      PageRouter.push(context, const SportistanCredit());
+                    }),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "Our commitment to assist you better we are charging ${commission.toString()}% commission from you which is Rs.${commissionCharge.toString()} Please add credits to continue booking services on Sportistan",
+                    style: const TextStyle(
+                        fontSize: 22,
+                        color: Colors.black54,
+                        fontFamily: "Nunito"),
+                  ),
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height / 5,
+                )
+              ],
+            ),
+          );
+        },
+      );
+    }
+  }
+
   Future<void> getAllSlots() async {
-    var collection = _server.collection('SportistanPartners');
-    var docSnapshot = await collection.doc(widget.groundID).get();
+    await _server
+        .collection("SportistanPartners")
+        .where('groundID', isEqualTo: widget.groundID)
+        .get()
+        .then((value) => {
+      data = value.docChanges,
+      allData = value.docChanges.first.doc
+          .get(DateFormat.EEEE().format(DateTime.parse(widget.date))),
+      commission = value.docChanges.first.doc.get('commission'),
+      entireDayAmount = value.docChanges.first.doc.get(
+          '${DateFormat.EEEE().format(DateTime.parse(widget.date))}EntireDay'),
+    });
 
-    Map<String, dynamic> data = docSnapshot.data()!;
-
-    daySlots = data[DateFormat.EEEE().format(DateTime.parse(widget.date))];
-
-    for (int j = 0; j < daySlots.length; j++) {
-      if (daySlots.isNotEmpty) {
-        int slotAmount =
-        data[DateFormat.EEEE().format(DateTime.parse(widget.date))][j]
-        ["price"];
-        total = slotAmount;
-        total + total;
+    for (int j = 0; j < allData.length; j++) {
+      if (allData.isNotEmpty) {
         finalAvailabilityList.add(MySlots(
-          slotID: data[DateFormat.EEEE().format(DateTime.parse(widget.date))][j]
-          ["slotID"],
-          group: data.toString(),
-          date: data.toString(),
-          bookingID: '',
+          slotID: allData[j]["slotID"],
+          group: widget.date,
+          date: widget.date,
+          bookingID: UniqueID.generateRandomString(),
           slotStatus: 'Available',
-          slotTime: data[DateFormat.EEEE().format(DateTime.parse(widget.date))]
-          [j]["time"],
-          slotPrice: data[DateFormat.EEEE().format(DateTime.parse(widget.date))]
-          [j]["price"],
-          feesDue: data[DateFormat.EEEE().format(DateTime.parse(widget.date))]
-          [j]["price"],
+          slotTime: allData[j]["time"],
+          slotPrice: allData[j]["price"],
+          feesDue: allData[j]["price"],
         ));
       }
     }
 
     listShow.value = true;
+    await showKYCErrorIfExist(data);
+  }
+
+  showKYCErrorIfExist(List<DocumentChange<Map<String, dynamic>>> data) async {
+    bool result = await data.first.doc.get('isVerified');
+    bool result2 = await data.first.doc.get('isKYCPending');
+    if (!result) {
+      if (result2) {
+        if (mounted) {
+          showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (ctx) {
+              return Platform.isIOS
+                  ? CupertinoAlertDialog(
+                title: const Text("KYC is Pending",
+                    style: TextStyle(color: Colors.orange)),
+                content: const Text(
+                    "KYC is UnderReview Please Check Status in Profile > My Grounds or Contact Customer Support"),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        Navigator.pop(context);
+                      },
+                      child: const Text("OK"))
+                ],
+              )
+                  : AlertDialog(
+                title: const Text("KYC is Pending",
+                    style: TextStyle(color: Colors.orange)),
+                content: Text(
+                    "Your ${widget.groundName} KYC is Under Review Please Check Status in Profile > My Grounds or Contact Helpdesk"),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        Navigator.pop(context);
+                      },
+                      child: const Text("OK"))
+                ],
+              );
+            },
+          );
+        }
+      }
+    }
+  }
+
+  List<String> bookingID = [];
+  List<String> includeSlots = [];
+
+  PhoneContact? _phoneContact;
+
+  checkPermissionForContacts(TextEditingController controller) async {
+    final granted = await FlutterContactPicker.hasPermission();
+    if (granted) {
+      final PhoneContact contact =
+      await FlutterContactPicker.pickPhoneContact();
+      setState(() {
+        _phoneContact = contact;
+      });
+      if (_phoneContact!.phoneNumber != null) {
+        if (_phoneContact!.phoneNumber!.number!.length > 10) {
+          controller.text = _phoneContact!.phoneNumber!.number!
+              .substring(3)
+              .split(" ")
+              .join("");
+        } else {
+          controller.text =
+              _phoneContact!.phoneNumber!.number!.split(" ").join("");
+        }
+      }
+    } else {
+      requestPermission(controller);
+    }
+  }
+
+  requestPermission(controller) async {
+    await FlutterContactPicker.requestPermission();
+    checkPermissionForContacts(controller);
+  }
+
+  String groupID = UniqueID.generateRandomString();
+
+  Future<void> createBooking(
+      {required double commissionCharge,
+        required num balance,
+        required String groundType,
+        required num keepBalance}) async {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text("Booking is creating"),
+      backgroundColor: Colors.green,
+    ));
+
+    for (int i = 0; i < allData.length; i++) {
+      bookingID.add(UniqueID.generateRandomString());
+      includeSlots.add(allData[i]["time"]);
+    }
+    for (int j = 0; j < allData.length; j++) {
+      await _server.collection("GroundBookings").add({
+        'bookingPerson': 'Ground Owner',
+        'groundName': widget.groundName,
+        'bookingCreated': DateTime.parse(widget.date),
+        'bookedAt': DateTime.now(),
+        'userID': _auth.currentUser!.uid,
+        'group': widget.date,
+        'groundType': groundType,
+        'isBookingCancelled': false,
+        'entireDayBooking': true,
+        'groupID': groupID,
+        'shouldCountInBalance': false,
+        'bookingCommissionCharged': commissionCharge,
+        'entireDayBookingID': bookingID,
+        'includeSlots': includeSlots,
+        'feesDue': double.parse(entireDayAmount!).toDouble().round().toInt() -
+            int.parse(advancePaymentController.value.text.trim().toString()),
+        'ratingGiven': false,
+        'rating': 3.0,
+        'TeamA' : 'Not Applicable',
+        'TeamB' : "Not Applicable",
+        'advancePayment':
+        double.parse(advancePaymentController.value.text).round().toInt(),
+        'bothTeamBooked': true,
+        'groundID': widget.groundID,
+        "teamA": {
+          'teamName': teamControllerA.value.text,
+          'personName': nameControllerA.value.text,
+          'phoneNumber': numberControllerA.value.text,
+          "notesTeamA": notesTeamA.value.text.isNotEmpty
+              ? notesTeamA.value.text.toString()
+              : "",
+        },
+        "teamB": {
+          'teamName': teamControllerA.value.text,
+          'personName': nameControllerA.value.text,
+          'phoneNumber': numberControllerA.value.text,
+          "notesTeamB": notesTeamA.value.text.toString(),
+        },
+        'slotPrice': double.parse(entireDayAmount!).toDouble().round().toInt(),
+        'slotStatus': "Booked",
+        'slotTime': allData[j]["time"],
+        'slotID': allData[j]["slotID"],
+        'bookingID': bookingID[j],
+        'date': widget.date,
+      });
+    }
+    await _server
+        .collection("SportistanUsers")
+        .doc(data.first.doc.id)
+        .update({'sportistanCredit': keepBalance - commissionCharge}).then(
+            (value) => {
+          if (mounted) {alertUser(bookingID: bookingID[0])}
+        });
+  }
+
+  Future<void> sendSms({required String number}) async {
+    String url =
+        'http://api.bulksmsgateway.in/sendmessage.php?user=sportslovez&password=7788330&mobile=$number&message=Your Booking is Confirmed at ${widget.groundName} on ${DateFormat.yMMMd().format(DateTime.parse(widget.date))} for Entire Day Thanks for Choosing Facility on Sportistan&sender=SPTNOT&type=3&template_id=1407170003612415391';
+    await http.post(Uri.parse(url));
+  }
+
+  Future<void> alertUser({required String bookingID}) async {
+    if (updateSmsAlert) {
+      if (numberControllerA.value.text.isNotEmpty) {
+        await sendSms(number: numberControllerA.value.text);
+        if (numberControllerA.value.text.isNotEmpty) {
+          if (numberControllerA.value.text != numberControllerA.value.text) {
+            await sendSms(number: numberControllerA.value.text);
+          }
+        }
+      }
+    }
+    updateSmsAlert = false;
+    moveToReceipt(bookingID: bookingID);
+  }
+
+  moveToReceipt({required String bookingID}) async {
+    PageRouter.pushReplacement(
+        context, BookingEntireDayInfo(bookingID: bookingID));
   }
 }
 

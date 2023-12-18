@@ -7,13 +7,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:lottie/lottie.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:sportistan/booking/show_slots.dart';
-import 'package:sportistan/main.dart';
-import 'package:sportistan/request.dart';
 import 'package:sportistan/widgets/page_route.dart';
 import 'package:http/http.dart' as http;
 
@@ -24,7 +23,15 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> with WidgetsBindingObserver {
+class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   int currentPage = 0;
   List<dynamic> groundServices = [];
 
@@ -39,57 +46,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   final _server = FirebaseFirestore.instance;
 
-  String? groundID;
-  String? groundName;
-  String? groundType;
-
-  String? distanceText;
-  String? durationText;
-
-  double? destinationLat;
-  double? destinationLong;
-
-  String? groundAddress;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.inactive:
-        break;
-      case AppLifecycleState.paused:
-        break;
-      case AppLifecycleState.resumed:
-        _getLatLng();
-        break;
-      case AppLifecycleState.detached:
-        break;
-      case AppLifecycleState.hidden:
-    }
-  }
-
-  @override
-  void initState() {
-    _getLatLng();
-    WidgetsBinding.instance.addObserver(this);
-    var hour = DateTime.now().hour;
-    if (hour <= 12) {
-      dayTime = "Good Morning, ";
-    } else if ((hour > 12) && (hour <= 16)) {
-      dayTime = "Good Afternoon, ";
-    } else {
-      dayTime = "Good Evening, ";
-    }
-    dayLoading.value = true;
-
-    super.initState();
-  }
-
-  double radiusInKm = 30;
-
-  @override
-  Widget build(BuildContext context) {
-    GeoPoint location = const GeoPoint(28.6569874, 77.1179452);
-
+  Stream<List<DocumentSnapshot<Map<String, dynamic>>>> init() {
+    GeoPoint location = GeoPoint(latitude!, longitude!);
     GeoFirePoint center = GeoFirePoint(location);
     const String field = 'geo';
 
@@ -111,427 +69,543 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     .where('isKYCPending', isEqualTo: false)
                     .where('isAccountOnHold', isEqualTo: false),
                 strictMode: true);
-    return Scaffold(
-      body: SafeArea(
-        child: SlidingUpPanel(
-          disableDraggableOnScrolling: true,
-          onPanelClosed: () {
-            panelListener.value = false;
-          },
-          controller: panelController,
-          maxHeight: MediaQuery.of(context).size.height / 1.3,
-          minHeight: 0,
-          panelBuilder: () => panel(),
-          body: StreamBuilder<List<DocumentSnapshot>>(
-              stream: stream,
-              builder: (BuildContext context, snapshot) {
-                final List<DocumentSnapshot<Object?>>? docs = snapshot.data;
+    return stream;
+  }
 
-                return snapshot.hasData
-                    ? SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            ValueListenableBuilder(
-                              valueListenable: showCurrentAddress,
-                              builder: (context, value, child) => Column(
-                                children: [
-                                  value
-                                      ? DelayedDisplay(
-                                          child: Card(
-                                              child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Column(
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Row(
+  String? groundID;
+  String? groundName;
+  String? groundType;
+
+  String? distanceText;
+  String? durationText;
+
+  double? destinationLat;
+  double? destinationLong;
+
+  String? groundAddress;
+
+  @override
+  void initState() {
+    _controller = AnimationController(vsync: this);
+    _getLatLng();
+    var hour = DateTime.now().hour;
+    if (hour <= 12) {
+      dayTime = "Good Morning, ";
+    } else if ((hour > 12) && (hour <= 16)) {
+      dayTime = "Good Afternoon, ";
+    } else {
+      dayTime = "Good Evening, ";
+    }
+    dayLoading.value = true;
+
+    super.initState();
+  }
+
+  double radiusInKm = 30;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: ValueListenableBuilder(
+        valueListenable: showCurrentAddress,
+        builder: (context, value, child) => value
+            ? SafeArea(
+                child: SlidingUpPanel(
+                  disableDraggableOnScrolling: true,
+                  onPanelClosed: () {
+                    panelListener.value = false;
+                  },
+                  controller: panelController,
+                  maxHeight: MediaQuery.of(context).size.height / 1.3,
+                  minHeight: 0,
+                  panelBuilder: () => panel(),
+                  body: StreamBuilder<List<DocumentSnapshot>>(
+                      stream: init(),
+                      builder: (BuildContext context, snapshot) {
+                        final List<DocumentSnapshot<Object?>>? docs =
+                            snapshot.data;
+
+                        return snapshot.hasData
+                            ? SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    ValueListenableBuilder(
+                                      valueListenable: showCurrentAddress,
+                                      builder: (context, value, child) =>
+                                          Column(
+                                        children: [
+                                          value
+                                              ? DelayedDisplay(
+                                                  child: Card(
+                                                      child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Column(
+                                                      children: [
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(8.0),
+                                                          child: Row(
+                                                            children: [
+                                                              Text(
+                                                                  dayTime
+                                                                      .toString(),
+                                                                  style: const TextStyle(
+                                                                      fontFamily:
+                                                                          "DMSans",
+                                                                      fontSize:
+                                                                          22)),
+                                                              const Text("👋",
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          22)),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        Row(
+                                                          children: [
+                                                            Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                      right: 5),
+                                                              child: CircleAvatar(
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .green
+                                                                          .shade900,
+                                                                  child: const Icon(
+                                                                      Icons
+                                                                          .location_pin,
+                                                                      color: Colors
+                                                                          .white)),
+                                                            ),
+                                                            Expanded(
+                                                              child: Text(
+                                                                address
+                                                                    .toString(),
+                                                                style: const TextStyle(
+                                                                    fontFamily:
+                                                                        "DMSans",
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .black45),
+                                                                softWrap: true,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
+                                                      ],
+                                                    ),
+                                                  )),
+                                                )
+                                              : const Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Column(
                                                     children: [
-                                                      Text(dayTime.toString(),
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontFamily:
-                                                                      "DMSans",
-                                                                  fontSize:
-                                                                      22)),
-                                                      const Text("👋",
-                                                          style: TextStyle(
-                                                              fontSize: 22)),
+                                                      CircularProgressIndicator(
+                                                          strokeWidth: 1,
+                                                          color:
+                                                              Colors.black54),
+                                                      Text(
+                                                        "Getting Location",
+                                                        style: TextStyle(
+                                                            fontFamily:
+                                                                "DMSans"),
+                                                      )
                                                     ],
                                                   ),
                                                 ),
-                                                Row(
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              right: 5),
-                                                      child: CircleAvatar(
-                                                          backgroundColor:
-                                                              Colors.green
-                                                                  .shade900,
-                                                          child: const Icon(
-                                                              Icons
-                                                                  .location_pin,
-                                                              color: Colors
-                                                                  .white)),
-                                                    ),
-                                                    Expanded(
-                                                      child: Text(
-                                                        address.toString(),
-                                                        style: const TextStyle(
-                                                            fontFamily:
-                                                                "DMSans",
-                                                            fontSize: 16,
-                                                            color:
-                                                                Colors.black45),
-                                                        softWrap: true,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                )
-                                              ],
-                                            ),
-                                          )),
-                                        )
-                                      : const Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Column(
-                                            children: [
-                                              CircularProgressIndicator(
-                                                  strokeWidth: 1,
-                                                  color: Colors.black54),
-                                              Text(
-                                                "Getting Location",
-                                                style: TextStyle(
-                                                    fontFamily: "DMSans"),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: docs!.length <= 1
-                                          ? Text(
-                                              "  We found ${docs.length} ground in ${radiusInKm.toInt().toString()} Kms",
-                                              style: const TextStyle(
-                                                  fontFamily: "DMSans",
-                                                  fontSize: 16,
-                                                  color: Colors.green))
-                                          : Text(
-                                              "  We found ${docs.length} grounds in ${radiusInKm.toInt().toString()} Kms  ",
-                                              style: const TextStyle(
-                                                  fontFamily: "DMSans",
-                                                  fontSize: 16,
-                                                  color: Colors.green)),
+                                        ],
+                                      ),
                                     ),
-                                    IconButton(
-                                        onPressed: () {
-                                          setFilter();
-                                        },
-                                        icon: const CircleAvatar(
-                                          child: Icon(
-                                            Icons.filter_list,
-                                            color: Colors.white,
-                                          ),
-                                        )),
-                                  ],
-                                ),
-                                if (docs.isEmpty)
-                                  Column(
-                                    children: [
-                                      Image.asset("assets/noResults.png"),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: CupertinoButton(
-                                            color: Colors.green,
-                                            onPressed: () {
-                                              setFilter();
-                                            },
-                                            child: const Text(
-                                              "Add Filter",
-                                              style: TextStyle(
-                                                  fontFamily: "DMSans"),
-                                            )),
-                                      )
-                                    ],
-                                  )
-                                else
-                                  ListView.builder(
-                                    physics: const BouncingScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemCount: docs.length,
-                                    itemBuilder: (_, index) {
-                                      final doc = docs[index];
-                                      List<dynamic> images =
-                                          doc["groundImages"];
-                                      List<dynamic> listCount = doc['badges'];
-                                      groundServices = doc['groundServices'];
-
-                                      return GestureDetector(
-                                        onTap: () {
-                                          groundID = doc["groundID"];
-                                          groundType = doc["groundType"];
-                                          groundAddress = doc["locationName"];
-                                          groundName = doc["groundName"];
-                                          panelListener.value = true;
-                                          GeoPoint geoPoint =
-                                              doc["geo"]['geopoint'];
-                                          destinationLat = geoPoint.latitude;
-                                          destinationLong = geoPoint.longitude;
-                                          getDistanceMatrix(
-                                            originLat: latitude,
-                                            originLong: longitude,
-                                            destinationLat: destinationLat,
-                                            destinationLong: destinationLong,
-                                          );
-                                          panelController.open();
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              bottom: 8.0),
-                                          child: Card(
-                                            color: Colors.grey.shade50,
-                                            child: Column(children: [
-                                              CarouselSlider.builder(
-                                                itemCount: images.length,
-                                                itemBuilder:
-                                                    (BuildContext context,
-                                                        int itemIndex,
-                                                        int pageViewIndex) {
-                                                  int count = itemIndex + 1;
-
-                                                  return Stack(
-                                                    children: [
-                                                      ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10),
-                                                        child: Image.network(
-                                                          doc["groundImages"]
-                                                              [itemIndex],
-                                                          loadingBuilder: (context,
-                                                              child,
-                                                              loadingProgress) {
-                                                            if (loadingProgress ==
-                                                                null) {
-                                                              return child;
-                                                            }
-                                                            return Shimmer
-                                                                .fromColors(
-                                                              baseColor: Colors
-                                                                  .grey
-                                                                  .shade300,
-                                                              highlightColor:
-                                                                  Colors.grey
-                                                                      .shade100,
-                                                              enabled: true,
-                                                              child: Center(
-                                                                child: Image.asset(
-                                                                    height: MediaQuery.of(context)
-                                                                            .size
-                                                                            .height /
-                                                                        8,
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .height /
-                                                                        8,
-                                                                    "assets/logo.png"),
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
-                                                      ),
-                                                      Card(
-                                                        shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        50)),
-                                                        child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .only(
-                                                                    left: 8.0,
-                                                                    right: 8.0,
-                                                                    top: 2,
-                                                                    bottom: 2),
-                                                            child: Text(
-                                                                '$count / ${images.length.toString()}')),
-                                                      )
-                                                    ],
-                                                  );
+                                    Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: docs!.length <= 1
+                                                  ? Text(
+                                                      "  We found ${docs.length} ground in ${radiusInKm.toInt().toString()} Kms",
+                                                      style: const TextStyle(
+                                                          fontFamily: "DMSans",
+                                                          fontSize: 16,
+                                                          color: Colors.green))
+                                                  : Text(
+                                                      "  We found ${docs.length} grounds in ${radiusInKm.toInt().toString()} Kms  ",
+                                                      style: const TextStyle(
+                                                          fontFamily: "DMSans",
+                                                          fontSize: 16,
+                                                          color: Colors.green)),
+                                            ),
+                                            IconButton(
+                                                onPressed: () {
+                                                  setFilter();
                                                 },
-                                                options: CarouselOptions(
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .height /
-                                                      3,
-                                                  enableInfiniteScroll: false,
-                                                  initialPage: currentPage,
-                                                  enlargeFactor: 0.3,
-                                                  scrollDirection:
-                                                      Axis.horizontal,
-                                                ),
-                                              ),
+                                                icon: const CircleAvatar(
+                                                  child: Icon(
+                                                    Icons.filter_list,
+                                                    color: Colors.white,
+                                                  ),
+                                                )),
+                                          ],
+                                        ),
+                                        if (docs.isEmpty)
+                                          Column(
+                                            children: [
+                                              Image.asset(
+                                                  "assets/noResults.png"),
                                               Padding(
                                                 padding:
                                                     const EdgeInsets.all(8.0),
-                                                child: Row(
-                                                  children: [
-                                                    Text(
-                                                      doc.get(
-                                                        "groundName",
-                                                      ),
-                                                      softWrap: true,
-                                                      maxLines: 3,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
+                                                child: CupertinoButton(
+                                                    color: Colors.green,
+                                                    onPressed: () {
+                                                      setFilter();
+                                                    },
+                                                    child: const Text(
+                                                      "Add Filter",
                                                       style: TextStyle(
-                                                          fontFamily: "DMSans",
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: MediaQuery.of(
+                                                          fontFamily: "DMSans"),
+                                                    )),
+                                              )
+                                            ],
+                                          )
+                                        else
+                                          ListView.builder(
+                                            physics:
+                                                const BouncingScrollPhysics(),
+                                            shrinkWrap: true,
+                                            itemCount: docs.length,
+                                            itemBuilder: (_, index) {
+                                              final doc = docs[index];
+                                              List<dynamic> images =
+                                                  doc["groundImages"];
+                                              List<dynamic> listCount =
+                                                  doc['badges'];
+                                              groundServices =
+                                                  doc['groundServices'];
+
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  groundID = doc["groundID"];
+                                                  groundType =
+                                                      doc["groundType"];
+                                                  groundAddress =
+                                                      doc["locationName"];
+                                                  groundName =
+                                                      doc["groundName"];
+                                                  panelListener.value = true;
+                                                  GeoPoint geoPoint =
+                                                      doc["geo"]['geopoint'];
+                                                  destinationLat =
+                                                      geoPoint.latitude;
+                                                  destinationLong =
+                                                      geoPoint.longitude;
+                                                  getDistanceMatrix(
+                                                    originLat: latitude,
+                                                    originLong: longitude,
+                                                    destinationLat:
+                                                        destinationLat,
+                                                    destinationLong:
+                                                        destinationLong,
+                                                  );
+                                                  panelController.open();
+                                                },
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          bottom: 8.0),
+                                                  child: Card(
+                                                    color: Colors.grey.shade50,
+                                                    child: Column(children: [
+                                                      CarouselSlider.builder(
+                                                        itemCount:
+                                                            images.length,
+                                                        itemBuilder: (BuildContext
+                                                                context,
+                                                            int itemIndex,
+                                                            int pageViewIndex) {
+                                                          int count =
+                                                              itemIndex + 1;
+
+                                                          return Stack(
+                                                            children: [
+                                                              ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10),
+                                                                child: Image
+                                                                    .network(
+                                                                  doc["groundImages"]
+                                                                      [
+                                                                      itemIndex],
+                                                                  loadingBuilder:
+                                                                      (context,
+                                                                          child,
+                                                                          loadingProgress) {
+                                                                    if (loadingProgress ==
+                                                                        null) {
+                                                                      return child;
+                                                                    }
+                                                                    return Shimmer
+                                                                        .fromColors(
+                                                                      baseColor: Colors
+                                                                          .grey
+                                                                          .shade300,
+                                                                      highlightColor: Colors
+                                                                          .grey
+                                                                          .shade100,
+                                                                      enabled:
+                                                                          true,
+                                                                      child:
+                                                                          Center(
+                                                                        child: Image.asset(
+                                                                            height: MediaQuery.of(context).size.height /
+                                                                                8,
+                                                                            width:
+                                                                                MediaQuery.of(context).size.height / 8,
+                                                                            "assets/logo.png"),
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                                ),
+                                                              ),
+                                                              Card(
+                                                                shape: RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            50)),
+                                                                child: Padding(
+                                                                    padding: const EdgeInsets
+                                                                        .only(
+                                                                        left:
+                                                                            8.0,
+                                                                        right:
+                                                                            8.0,
+                                                                        top: 2,
+                                                                        bottom:
+                                                                            2),
+                                                                    child: Text(
+                                                                        '$count / ${images.length.toString()}')),
+                                                              )
+                                                            ],
+                                                          );
+                                                        },
+                                                        options:
+                                                            CarouselOptions(
+                                                          height: MediaQuery.of(
                                                                       context)
                                                                   .size
-                                                                  .width /
-                                                              18),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Card(
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        50)),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              left: 15,
-                                                              right: 15,
-                                                              top: 5,
-                                                              bottom: 5),
-                                                      child: Text(doc.get(
-                                                        "groundType",
-                                                      )),
-                                                    ),
-                                                  ),
-                                                  const Icon(
-                                                    Icons.star,
-                                                    color: Colors.orange,
-                                                  ),
-                                                  const Text("4.1")
-                                                ],
-                                              ),
-                                              Container(
-                                                width: double.infinity,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height /
-                                                    20,
-                                                alignment: Alignment.topCenter,
-                                                child: ListView.builder(
-                                                    shrinkWrap: true,
-                                                    physics:
-                                                        const BouncingScrollPhysics(),
-                                                    scrollDirection:
-                                                        Axis.horizontal,
-                                                    itemBuilder:
-                                                        (context, index) {
-                                                      return Row(
-                                                        children: [
-                                                          Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(8.0),
-                                                            child: Row(
-                                                              children: [
-                                                                Text(
-                                                                    "🏅${listCount[index]}",
-                                                                    style: const TextStyle(
-                                                                        fontFamily:
-                                                                            "DMSans")),
-                                                              ],
-                                                            ),
-                                                          )
-                                                        ],
-                                                      );
-                                                    },
-                                                    itemCount:
-                                                        listCount.length),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Card(
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        50)),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Shimmer.fromColors(
-                                                        period: const Duration(
-                                                            seconds: 2),
-                                                        baseColor:
-                                                            Colors.black87,
-                                                        loop: 6,
-                                                        highlightColor:
-                                                            Colors.white,
-                                                        child: Text(
-                                                            'Starting Onwards : ₹${doc['onwards']}',
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 18,
-                                                              fontFamily:
-                                                                  "DMSans",
-                                                            )),
+                                                                  .height /
+                                                              3,
+                                                          enableInfiniteScroll:
+                                                              false,
+                                                          initialPage:
+                                                              currentPage,
+                                                          enlargeFactor: 0.3,
+                                                          scrollDirection:
+                                                              Axis.horizontal,
+                                                        ),
                                                       ),
-                                                    ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Row(
+                                                          children: [
+                                                            Text(
+                                                              doc.get(
+                                                                "groundName",
+                                                              ),
+                                                              softWrap: true,
+                                                              maxLines: 3,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                  fontFamily:
+                                                                      "DMSans",
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontSize: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width /
+                                                                      18),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Card(
+                                                            shape: RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            50)),
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                      left: 15,
+                                                                      right: 15,
+                                                                      top: 5,
+                                                                      bottom:
+                                                                          5),
+                                                              child:
+                                                                  Text(doc.get(
+                                                                "groundType",
+                                                              )),
+                                                            ),
+                                                          ),
+                                                          const Icon(
+                                                            Icons.star,
+                                                            color:
+                                                                Colors.orange,
+                                                          ),
+                                                          const Text("4.1")
+                                                        ],
+                                                      ),
+                                                      Container(
+                                                        width: double.infinity,
+                                                        height: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .height /
+                                                            20,
+                                                        alignment:
+                                                            Alignment.topCenter,
+                                                        child: ListView.builder(
+                                                            shrinkWrap: true,
+                                                            physics:
+                                                                const BouncingScrollPhysics(),
+                                                            scrollDirection:
+                                                                Axis.horizontal,
+                                                            itemBuilder:
+                                                                (context,
+                                                                    index) {
+                                                              return Row(
+                                                                children: [
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets
+                                                                            .all(
+                                                                            8.0),
+                                                                    child: Row(
+                                                                      children: [
+                                                                        Text(
+                                                                            "🏅${listCount[index]}",
+                                                                            style:
+                                                                                const TextStyle(fontFamily: "DMSans")),
+                                                                      ],
+                                                                    ),
+                                                                  )
+                                                                ],
+                                                              );
+                                                            },
+                                                            itemCount: listCount
+                                                                .length),
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Card(
+                                                            shape: RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            50)),
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(8.0),
+                                                              child: Shimmer
+                                                                  .fromColors(
+                                                                period:
+                                                                    const Duration(
+                                                                        seconds:
+                                                                            2),
+                                                                baseColor: Colors
+                                                                    .black87,
+                                                                loop: 6,
+                                                                highlightColor:
+                                                                    Colors
+                                                                        .white,
+                                                                child: Text(
+                                                                    'Starting Onwards : ₹${doc['onwards']}',
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontSize:
+                                                                          18,
+                                                                      fontFamily:
+                                                                          "DMSans",
+                                                                    )),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ]),
                                                   ),
-                                                ],
-                                              )
-                                            ]),
+                                                ),
+                                              );
+                                            },
                                           ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    : const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircularProgressIndicator(
-                              strokeWidth: 1,
-                              color: Colors.black38,
-                            )
-                          ],
-                        ),
-                      );
-              }),
-        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircularProgressIndicator(
+                                      strokeWidth: 1,
+                                      color: Colors.black38,
+                                    )
+                                  ],
+                                ),
+                              );
+                      }),
+                ),
+              )
+            : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Searching Grounds Near You',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.black54,
+                        fontFamily: "DMSans",
+                      ),softWrap: true,),
+                ),
+                Center(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height / 3.5,
+                    width: MediaQuery.of(context).size.height / 3.5,
+                    child: Lottie.asset(
+                      'assets/searching.json',
+                      controller: _controller,
+                      onLoaded: (composition) {
+                        _controller
+                          ..duration = composition.duration
+                          ..repeat();
+                      },
+                    ),
+                  ),
+                )
+              ]),
       ),
     );
   }
@@ -539,25 +613,36 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   String? address;
 
   Future<void> _getLatLng() async {
-    PermissionStatus permissionStatus;
     try {
-      permissionStatus = await Permission.location.request();
-      if (permissionStatus == PermissionStatus.granted ||
-          permissionStatus == PermissionStatus.limited) {
+      PermissionStatus permissionStatus = await Permission.location.status;
+      if (permissionStatus == PermissionStatus.granted) {
         Position position = await Geolocator.getCurrentPosition();
         latitude = position.latitude;
         longitude = position.longitude;
-        address =
-            await RequestAddressMethods.searchCoordinateRequests(position);
-        if (address == "Couldn't Locate") {
-          showCurrentAddress.value = false;
-        } else {
-          showCurrentAddress.value = true;
+        String url =
+            "https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyCHJizjCjQBbAr1D6trmyKJPzOKyHGImZE";
+        http.Response response = await http.get(Uri.parse(url));
+        if (response.statusCode == 200) {
+          String jsonData = response.body;
+          var decoder = await jsonDecode(jsonData);
+          String result = await decoder["results"][0]["formatted_address"];
+          if (result == "Couldn't Locate") {
+            showCurrentAddress.value = false;
+            if (_controller.isAnimating) {
+              _controller.dispose();
+            }
+          } else {
+            address = result;
+            showCurrentAddress.value = true;
+          }
+        }
+      } else if (permissionStatus.isPermanentlyDenied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text("Location Denied")));
         }
       } else {
-        if (mounted) {
-          PageRouter.pushRemoveUntil(context, const MyApp());
-        }
+        permissionStatus = await Permission.location.request();
       }
     } catch (error) {
       if (mounted) {
@@ -600,7 +685,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   Slider(
                     value: radiusInKm,
                     min: 1,
-                    max: 300,
+                    max: 100,
                     onChanged: (double value) {
                       setState(() {
                         radiusInKm = value.round().toDouble();
@@ -656,10 +741,13 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                             return Column(
                               children: [
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    const Text("Close",style: TextStyle(fontFamily: "DMSans",fontWeight: FontWeight.bold,color: Colors.black54)),
+                                    const Text("Close",
+                                        style: TextStyle(
+                                            fontFamily: "DMSans",
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black54)),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: CircleAvatar(

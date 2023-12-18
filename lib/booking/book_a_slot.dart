@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -86,6 +87,20 @@ class _BookASlotState extends State<BookASlot> {
 
   late num totalSlotPrice;
 
+  int teamALevelTag = 1;
+  int teamBLevelTag = 1;
+  List<String> teamALevelTagOptions = [
+    'Beginner',
+    'Intermediate',
+    'Advance',
+    'Pro',
+  ];List<String> teamBLevelTagOptions = [
+    'Beginner',
+    'Intermediate',
+    'Advance',
+    'Pro',
+  ];
+
   Future<void> serverInit() async {
     if (widget.bookingID.isNotEmpty) {
       await _server
@@ -120,6 +135,8 @@ class _BookASlotState extends State<BookASlot> {
                     alreadyCommissionCharged = true,
                     commissionCharged =
                         value.docs.first["bookingCommissionCharged"],
+                teamALevelTag = value.docs.first["teamASkill"],
+                teamBLevelTag = value.docs.first["teamBSkill"],
                   },
                 _checkBalance(false)
               });
@@ -419,6 +436,32 @@ class _BookASlotState extends State<BookASlot> {
                                   ),
                                 ),
                               ),
+                        ListView(
+                          shrinkWrap: true,
+                            addAutomaticKeepAlives: true,
+                            children: <Widget>[
+                        Content(
+                        title: 'Choose Team A Skill',
+                            child: ChipsChoice<int>.single(
+                              value: teamALevelTag,
+                              onChanged: (val) => setState(() => teamALevelTag = val),
+                              choiceItems: C2Choice.listFrom<int, String>(
+                                source: teamALevelTagOptions,
+                                value: (i, v) => i,
+                                label: (i, v) => v,
+                                tooltip: (i, v) => v,
+                              ),
+                              choiceCheckmark: true,
+                              choiceStyle: C2ChipStyle.filled(
+                                selectedStyle: const C2ChipStyle(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(25),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            ),
+                            ]),
                               Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: SizedBox(
@@ -591,6 +634,32 @@ class _BookASlotState extends State<BookASlot> {
                                     ),
                                   ),
                                 ),
+                                ListView(
+                                    shrinkWrap: true,
+                                    addAutomaticKeepAlives: true,
+                                    children: <Widget>[
+                                      Content(
+                                        title: 'Choose Team B Skill',
+                                        child: ChipsChoice<int>.single(
+                                          value: teamBLevelTag,
+                                          onChanged: (val) => setState(() => teamBLevelTag = val),
+                                          choiceItems: C2Choice.listFrom<int, String>(
+                                            source: teamBLevelTagOptions,
+                                            value: (i, v) => i,
+                                            label: (i, v) => v,
+                                            tooltip: (i, v) => v,
+                                          ),
+                                          choiceCheckmark: true,
+                                          choiceStyle: C2ChipStyle.filled(
+                                            selectedStyle: const C2ChipStyle(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(25),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ]),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: SizedBox(
@@ -615,6 +684,88 @@ class _BookASlotState extends State<BookASlot> {
                             )
                           : Container();
                     },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ValueListenableBuilder(
+                        valueListenable: checkBoxTeamB,
+                        builder:
+                            (context, value, child) => SizedBox(
+                          width: MediaQuery.of(context)
+                              .size
+                              .width /
+                              2,
+                          child: Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.center,
+                            children: [
+                              CupertinoSwitch(
+                                  value: value,
+                                  onChanged:
+                                  widget.bookingID
+                                      .isNotEmpty
+                                      ? null
+                                      : (result) {
+                                    if (nameKeyA.currentState!.validate() &
+                                    numberKeyA
+                                        .currentState!
+                                        .validate() &
+                                    teamControllerKeyA
+                                        .currentState!
+                                        .validate()) {
+                                      _checkBalance(
+                                          false);
+                                      checkBoxTeamB
+                                          .value =
+                                          result;
+                                      teamControllerB
+                                          .text =
+                                          teamControllerA
+                                              .value
+                                              .text;
+                                      nameControllerB
+                                          .text =
+                                          nameControllerA
+                                              .value
+                                              .text;
+                                      numberControllerB
+                                          .text =
+                                          numberControllerA
+                                              .value
+                                              .text;
+                                      showTeamB
+                                          .value =
+                                          result;
+                                      if (result) {
+                                        setState(
+                                                () {
+                                              num newAmount =
+                                                  updatedPrice;
+                                              priceController.text =
+                                                  newAmount.toString();
+                                            });
+                                      } else {
+                                        setState(
+                                                () {
+                                              double
+                                              newAmount =
+                                                  updatedPrice / 2.toInt().round();
+                                              priceController.text = newAmount
+                                                  .round()
+                                                  .toInt()
+                                                  .toString();
+                                            });
+                                      }
+                                    }
+                                  }),
+                              const Text(
+                                "Book for both Teams",
+                                style: TextStyle(
+                                    fontFamily: "DMSans"),
+                              )
+                            ],
+                          ),
+                        )),
                   ),
                   ValueListenableBuilder(
                     valueListenable: commissionCalculateListener,
@@ -674,88 +825,7 @@ class _BookASlotState extends State<BookASlot> {
                                     ],
                                   ),
                                 )),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: ValueListenableBuilder(
-                                      valueListenable: checkBoxTeamB,
-                                      builder:
-                                          (context, value, child) => SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width /
-                                                    2,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    CupertinoSwitch(
-                                                        value: value,
-                                                        onChanged:
-                                                            widget.bookingID
-                                                                    .isNotEmpty
-                                                                ? null
-                                                                : (result) {
-                                                                    if (nameKeyA.currentState!.validate() &
-                                                                        numberKeyA
-                                                                            .currentState!
-                                                                            .validate() &
-                                                                        teamControllerKeyA
-                                                                            .currentState!
-                                                                            .validate()) {
-                                                                      _checkBalance(
-                                                                          false);
-                                                                      checkBoxTeamB
-                                                                              .value =
-                                                                          result;
-                                                                      teamControllerB
-                                                                              .text =
-                                                                          teamControllerA
-                                                                              .value
-                                                                              .text;
-                                                                      nameControllerB
-                                                                              .text =
-                                                                          nameControllerA
-                                                                              .value
-                                                                              .text;
-                                                                      numberControllerB
-                                                                              .text =
-                                                                          numberControllerA
-                                                                              .value
-                                                                              .text;
-                                                                      showTeamB
-                                                                              .value =
-                                                                          result;
-                                                                      if (result) {
-                                                                        setState(
-                                                                            () {
-                                                                          num newAmount =
-                                                                              updatedPrice;
-                                                                          priceController.text =
-                                                                              newAmount.toString();
-                                                                        });
-                                                                      } else {
-                                                                        setState(
-                                                                            () {
-                                                                          double
-                                                                              newAmount =
-                                                                              updatedPrice / 2.toInt().round();
-                                                                          priceController.text = newAmount
-                                                                              .round()
-                                                                              .toInt()
-                                                                              .toString();
-                                                                        });
-                                                                      }
-                                                                    }
-                                                                  }),
-                                                    const Text(
-                                                      "Book for both Teams",
-                                                      style: TextStyle(
-                                                          fontFamily: "DMSans"),
-                                                    )
-                                                  ],
-                                                ),
-                                              )),
-                                ),
+
                               ],
                             ),
                           )
@@ -860,6 +930,8 @@ class _BookASlotState extends State<BookASlot> {
               'ratingGiven': false,
               'rating': 3.0,
               'ratingTags': [],
+              'teamASkill' : teamALevelTag.toInt(),
+              'teamBSkill' : showTeamB.value ? teamBLevelTag.toInt() : 1,
               'groundID': widget.groundID,
               'TeamA': alreadyCommissionCharged
                   ? commissionCharged
@@ -930,6 +1002,7 @@ class _BookASlotState extends State<BookASlot> {
               'groundType': widget.groundType,
               'shouldCountInBalance': false,
               'isBookingCancelled': false,
+
               'userID': _auth.currentUser!.uid,
               'bookingCommissionCharged': serverCommissionCharge,
               'feesDue': calculateFeesDue(),
@@ -945,6 +1018,8 @@ class _BookASlotState extends State<BookASlot> {
               'TeamB': checkBoxTeamB.value
                   ? serverCommissionCharge
                   : 'NotApplicable',
+              'teamASkill' : teamALevelTag.toInt(),
+              'teamBSkill' : showTeamB.value ? teamBLevelTag.toInt() : 1,
               "teamA": {
                 'teamName': teamControllerA.value.text,
                 'personName': nameControllerA.value.text,
