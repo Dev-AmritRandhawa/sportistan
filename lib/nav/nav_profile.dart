@@ -1,18 +1,18 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:pinput/pinput.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:sportistan/authentication/authentication.dart';
 import 'package:sportistan/nav/crop.dart';
+import 'package:sportistan/nav/nav_history.dart';
 import 'package:sportistan/payment/sportistan_credit.dart';
 import 'package:sportistan/widgets/errors.dart';
 import 'package:sportistan/widgets/page_route.dart';
@@ -54,27 +54,28 @@ class _NavProfileState extends State<NavProfile> {
       );
     }
   }
+
   final otpController = TextEditingController();
   final numberController = TextEditingController();
   final finalOTPController = TextEditingController();
   GlobalKey<FormState> numberKey = GlobalKey<FormState>();
   ValueNotifier<bool> loading = ValueNotifier<bool>(false);
   PanelController pc = PanelController();
-  final Uri toLaunch = Uri(
-      scheme: 'https', host: 'www.sportistan.co.in', path: '/');
+  final Uri toLaunch =
+      Uri(scheme: 'https', host: 'www.sportistan.co.in', path: '/');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SlidingUpPanel(controller: pc,
+      body: SlidingUpPanel(
+        controller: pc,
         minHeight: 0,
-        maxHeight: MediaQuery.of(context).size.height/2,
+        maxHeight: MediaQuery.of(context).size.height / 2,
         panelBuilder: () => panel(),
         body: SafeArea(
           child: SingleChildScrollView(
-            child: Column(
-
-                children: [
+            child: Column(children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -119,14 +120,45 @@ class _NavProfileState extends State<NavProfile> {
                             return SingleChildScrollView(
                               child: Column(
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(doc[index].get('name'),
-                                        style: const TextStyle(
-                                            fontFamily: 'DMSans',
-                                            color: Colors.black,
-                                            fontSize: 26),
-                                        softWrap: true),
+                                  Text(doc[index].get('name'),
+                                      style: const TextStyle(
+                                          fontFamily: 'DMSans',
+                                          color: Colors.black,
+                                          fontSize: 26),
+                                      softWrap: true),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Card(
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(50)),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: RatingBar.builder(
+                                            itemSize: 16,
+                                            initialRating:
+                                                doc[index].get('profileRating'),
+                                            ignoreGestures: true,
+                                            direction: Axis.horizontal,
+                                            allowHalfRating: true,
+                                            itemCount: 5,
+                                            itemPadding:
+                                                const EdgeInsets.symmetric(
+                                                    horizontal: 4.0),
+                                            itemBuilder: (context, _) =>
+                                                const Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                            ),
+                                            onRatingUpdate: (value) {},
+                                          ),
+                                        ),
+                                      ),
+                                      Text(doc[index]
+                                          .get('profileRating')
+                                          .toString())
+                                    ],
                                   ),
                                   ValueListenableBuilder(
                                     valueListenable: imageListener,
@@ -143,13 +175,13 @@ class _NavProfileState extends State<NavProfile> {
                                                               MaterialPageRoute(
                                                                 builder: (context) =>
                                                                     CropImageTool(
-                                                                        ref: doc[
-                                                                                index]
+                                                                        ref: doc[index]
                                                                             .id),
                                                               ))
                                                           .then((value) => {
                                                                 imageListener
-                                                                    .value = true
+                                                                        .value =
+                                                                    true
                                                               });
                                                     }
                                                     if (Platform.isIOS) {
@@ -158,13 +190,13 @@ class _NavProfileState extends State<NavProfile> {
                                                               CupertinoPageRoute(
                                                                 builder: (context) =>
                                                                     CropImageTool(
-                                                                        ref: doc[
-                                                                                index]
+                                                                        ref: doc[index]
                                                                             .id),
                                                               ))
                                                           .then((value) => {
                                                                 imageListener
-                                                                    .value = true
+                                                                        .value =
+                                                                    true
                                                               });
                                                     }
                                                   },
@@ -199,13 +231,13 @@ class _NavProfileState extends State<NavProfile> {
                                                               MaterialPageRoute(
                                                                 builder: (context) =>
                                                                     CropImageTool(
-                                                                        ref: doc[
-                                                                                index]
+                                                                        ref: doc[index]
                                                                             .id),
                                                               ))
                                                           .then((value) => {
                                                                 imageListener
-                                                                    .value = true
+                                                                        .value =
+                                                                    true
                                                               });
                                                     }
                                                     if (Platform.isIOS) {
@@ -214,13 +246,13 @@ class _NavProfileState extends State<NavProfile> {
                                                               CupertinoPageRoute(
                                                                 builder: (context) =>
                                                                     CropImageTool(
-                                                                        ref: doc[
-                                                                                index]
+                                                                        ref: doc[index]
                                                                             .id),
                                                               ))
                                                           .then((value) => {
                                                                 imageListener
-                                                                    .value = true
+                                                                        .value =
+                                                                    true
                                                               });
                                                     }
                                                   },
@@ -230,7 +262,8 @@ class _NavProfileState extends State<NavProfile> {
                                                     maxRadius: 50,
                                                     child: Padding(
                                                       padding:
-                                                          const EdgeInsets.all(8.0),
+                                                          const EdgeInsets.all(
+                                                              8.0),
                                                       child: Image.asset(
                                                           'assets/logo.png'),
                                                     ),
@@ -258,36 +291,35 @@ class _NavProfileState extends State<NavProfile> {
                                             fontSize: 18),
                                         softWrap: true),
                                   ),
-                                  Text('Rs.${doc[index].get('sportistanCredit')}',
+                                  Text(
+                                      'Rs.${doc[index].get('sportistanCredit')}',
                                       style: const TextStyle(
                                           fontFamily: "DMSans",
                                           fontSize: 28,
                                           color: Colors.green,
                                           fontWeight: FontWeight.bold)),
                                   CupertinoButton(
-                                      borderRadius: BorderRadius.zero,
                                       color: Colors.indigo,
                                       onPressed: () {
                                         PageRouter.push(
-                                            context, const SportistanCredit());
+                                            context,
+                                            SportistanCredit(
+                                              groundID: FirebaseAuth
+                                                  .instance.currentUser!.uid,
+                                            ));
                                       },
-                                      child: const Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: EdgeInsets.only(right: 8.0),
-                                            child: Icon(
-                                              Icons.account_balance_wallet,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          Text('View My Wallet',
-                                              style:
-                                                  TextStyle(fontFamily: "DMSans")),
-                                        ],
-                                      )),
-                                  SizedBox(
-                                    height: MediaQuery.of(context).size.height / 25,
+                                      child: const Text('My Wallet',
+                                          style:
+                                              TextStyle(fontFamily: "DMSans"))),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(doc[index].get('phoneNumber'),
+                                        style: const TextStyle(
+                                            fontFamily: 'DMSans',
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 22),
+                                        softWrap: true),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
@@ -301,17 +333,44 @@ class _NavProfileState extends State<NavProfile> {
                                                 color: Colors.black54,
                                                 fontSize: 20)),
                                         ValueListenableBuilder(
-                                          valueListenable: notificationListenable,
+                                          valueListenable:
+                                              notificationListenable,
                                           builder: (context, value, child) {
                                             return CupertinoSwitch(
                                               value: value,
                                               onChanged: (v) {
-                                                notificationListenable.value = v;
+                                                notificationListenable.value =
+                                                    v;
                                               },
                                             );
                                           },
                                         )
                                       ],
+                                    ),
+                                  ),
+                                  Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        onTap: () {
+                                          PageRouter.push(
+                                              context, const NavHistory());
+                                        },
+                                        child: const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text('My Bookings',
+                                                style: TextStyle(
+                                                    fontFamily: "DMSans",
+                                                    color: Colors.black54,
+                                                    fontSize: 20)),
+                                            Icon(
+                                              Icons.history,
+                                            )
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   const Padding(
@@ -422,12 +481,11 @@ class _NavProfileState extends State<NavProfile> {
                             );
                           },
                         )
-                      : const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Center(child: CircularProgressIndicator()),
-                          ],
-                        );
+                      : const Center(
+                          child: CircularProgressIndicator(
+                          strokeWidth: 1,
+                          color: Colors.black54,
+                        ));
                 },
               ),
             ]),
@@ -439,7 +497,7 @@ class _NavProfileState extends State<NavProfile> {
 
   Future<void> shareApp() async {
     const String androidAppLink =
-        'https://play.google.com/store/apps/details?id=co.in.sportistan.sportistan_partners';
+        'https://play.google.com/store/apps/details?id=co.in.sportistan.sportistan';
     const String appleAppLink =
         'https://apps.apple.com/in/app/whatsapp-messenger/id310633997';
     if (Platform.isAndroid) {
@@ -543,47 +601,47 @@ class _NavProfileState extends State<NavProfile> {
           builder: (context, value, child) {
             return value
                 ? Padding(
-              padding:
-              EdgeInsets.all(MediaQuery.of(context).size.width / 25),
-              child: Pinput(
-                pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
-                controller: otpController,
-                androidSmsAutofillMethod:
-                AndroidSmsAutofillMethod.smsUserConsentApi,
-                listenForMultipleSmsOnAndroid: true,
-                defaultPinTheme: defaultPinTheme,
-                length: 6,
-                separatorBuilder: (index) => const SizedBox(width: 8),
-                hapticFeedbackType: HapticFeedbackType.lightImpact,
-                cursor: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 9),
-                      width: 22,
-                      height: 1,
-                      color: focusedBorderColor,
+                    padding:
+                        EdgeInsets.all(MediaQuery.of(context).size.width / 25),
+                    child: Pinput(
+                      pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
+                      controller: otpController,
+                      androidSmsAutofillMethod:
+                          AndroidSmsAutofillMethod.smsUserConsentApi,
+                      listenForMultipleSmsOnAndroid: true,
+                      defaultPinTheme: defaultPinTheme,
+                      length: 6,
+                      separatorBuilder: (index) => const SizedBox(width: 8),
+                      hapticFeedbackType: HapticFeedbackType.lightImpact,
+                      cursor: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 9),
+                            width: 22,
+                            height: 1,
+                            color: focusedBorderColor,
+                          ),
+                        ],
+                      ),
+                      focusedPinTheme: defaultPinTheme.copyWith(
+                        decoration: defaultPinTheme.decoration!.copyWith(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: focusedBorderColor),
+                        ),
+                      ),
+                      submittedPinTheme: defaultPinTheme.copyWith(
+                        decoration: defaultPinTheme.decoration!.copyWith(
+                          color: fillColor,
+                          borderRadius: BorderRadius.circular(19),
+                          border: Border.all(color: focusedBorderColor),
+                        ),
+                      ),
+                      errorPinTheme: defaultPinTheme.copyBorderWith(
+                        border: Border.all(color: Colors.redAccent),
+                      ),
                     ),
-                  ],
-                ),
-                focusedPinTheme: defaultPinTheme.copyWith(
-                  decoration: defaultPinTheme.decoration!.copyWith(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: focusedBorderColor),
-                  ),
-                ),
-                submittedPinTheme: defaultPinTheme.copyWith(
-                  decoration: defaultPinTheme.decoration!.copyWith(
-                    color: fillColor,
-                    borderRadius: BorderRadius.circular(19),
-                    border: Border.all(color: focusedBorderColor),
-                  ),
-                ),
-                errorPinTheme: defaultPinTheme.copyBorderWith(
-                  border: Border.all(color: Colors.redAccent),
-                ),
-              ),
-            )
+                  )
                 : Container();
           },
         ),
@@ -592,29 +650,29 @@ class _NavProfileState extends State<NavProfile> {
             return value
                 ? Container()
                 : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CupertinoButton(
-                onPressed: () async {
-                  if (numberKey.currentState!.validate()) {
-                    try {
-                      loading.value = true;
-                      _verifyByNumber(
-                          countryCode, numberController.value.text);
-                    } on FirebaseAuthException catch (e) {
-                      if (mounted) {
-                        Errors.flushBarInform(
-                            e.message.toString(), context, "Sorry");
-                      }
-                    }
-                  }
-                },
-                color: Colors.green,
-                child: const Text(
-                  "Change Number",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            );
+                    padding: const EdgeInsets.all(8.0),
+                    child: CupertinoButton(
+                      onPressed: () async {
+                        if (numberKey.currentState!.validate()) {
+                          try {
+                            loading.value = true;
+                            _verifyByNumber(
+                                countryCode, numberController.value.text);
+                          } on FirebaseAuthException catch (e) {
+                            if (mounted) {
+                              Errors.flushBarInform(
+                                  e.message.toString(), context, "Sorry");
+                            }
+                          }
+                        }
+                      },
+                      color: Colors.green,
+                      child: const Text(
+                        "Change Number",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  );
           },
           valueListenable: loading,
         ),
@@ -623,12 +681,12 @@ class _NavProfileState extends State<NavProfile> {
           builder: (context, value, child) {
             return value
                 ? CupertinoButton(
-              color: Colors.green.shade700,
-              onPressed: () {
-                _manualVerify(otpController.value.text);
-              },
-              child: const Text("Submit OTP"),
-            )
+                    color: Colors.green.shade700,
+                    onPressed: () {
+                      _manualVerify(otpController.value.text);
+                    },
+                    child: const Text("Submit OTP"),
+                  )
                 : Container();
           },
         ),
@@ -637,9 +695,9 @@ class _NavProfileState extends State<NavProfile> {
           builder: (context, value, child) {
             return value
                 ? const CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 2,
-            )
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  )
                 : Container();
           },
         ),
@@ -647,16 +705,15 @@ class _NavProfileState extends State<NavProfile> {
     );
   }
 
-
   Future<void> _manualVerify(String smsCode) async {
     PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verification.toString(), smsCode: smsCode);
     try {
       loading.value = true;
       await _auth.currentUser!.updatePhoneNumber(credential).then((value) => {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Phone Number Updated Successfully")))
-      });
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text("Phone Number Updated Successfully")))
+          });
     } on FirebaseAuthException catch (e) {
       loading.value = false;
       if (mounted) {
@@ -696,5 +753,4 @@ class _NavProfileState extends State<NavProfile> {
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
   }
-
 }

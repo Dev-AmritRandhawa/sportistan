@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sportistan/nav/home.dart';
+import 'package:sportistan/nav/main_page.dart';
 import 'package:sportistan/widgets/page_route.dart';
 
 class PermissionCheck extends StatefulWidget {
@@ -109,7 +109,7 @@ class _PermissionCheckState extends State<PermissionCheck> with WidgetsBindingOb
       } else if (permissionStatus == PermissionStatus.granted ||
           permissionStatus == PermissionStatus.limited) {
         if (mounted) {
-          PageRouter.pushRemoveUntil(context, const Home());
+          PageRouter.pushRemoveUntil(context, const MainPage());
         }
       } else if (permissionStatus == PermissionStatus.permanentlyDenied) {
         setState(() {

@@ -71,11 +71,14 @@ dependencies:
   maps_launcher: ^2.2.0
   animated_text_kit: any
   liquid_pull_to_refresh: any
-  share_plus: any
+  share_plus: ^7.2.1
   image_cropper: ^5.0.1
   image_picker: any
-  phonepe_payment_sdk: ^1.0.4
   crypto: ^3.0.3
+  algolia_helper_flutter: ^0.5.0
+  dots_indicator: ^3.0.0
+  recaptcha_enterprise_flutter: ^18.4.0
+  phonepe_payment_sdk: ^1.1.0
 
 
 

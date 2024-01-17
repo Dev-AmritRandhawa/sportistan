@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "497512590176-aenkop28pmoair0h715anuki177032pf.apps.googleusercontent.com",
+          "client_id": "497512590176-82n3euk5c51u0thu7aan53j39essgbj4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "co.in.sportistan.sportistan",
-            "certificate_hash": "0b2727742488a5b8054d2a414708d7ccd7f80cf0"
+            "certificate_hash": "df64479f4d64119f626a1d26c27b42e1dfbbb068"
           }
         },
         {

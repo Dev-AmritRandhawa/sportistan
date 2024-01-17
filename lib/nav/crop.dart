@@ -9,6 +9,7 @@ import 'package:image_cropper/image_cropper.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CropImageTool extends StatefulWidget {
   final String ref;
@@ -24,8 +25,8 @@ class _CropImageToolState extends State<CropImageTool> {
   ValueNotifier<bool> setProfileLoader = ValueNotifier<bool>(false);
 
   Future _pickImage() async {
-    bool  permission = await Permission.location.isGranted;
-    if(permission){
+    bool permission = await Permission.location.isGranted;
+    if (permission) {
       final pickedImage = await ImagePicker().pickImage(
         source: ImageSource.gallery,
         imageQuality: 50,
@@ -37,11 +38,10 @@ class _CropImageToolState extends State<CropImageTool> {
         });
         _cropImage();
       }
-    }else{
+    } else {
       await Permission.location.request();
       _pickImage();
     }
-
   }
 
   Future _cropImage() async {
@@ -71,9 +71,9 @@ class _CropImageToolState extends State<CropImageTool> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+            backgroundColor: Colors.white,
             elevation: 0,
             foregroundColor: Colors.black,
             title: const Text("Close")),
@@ -116,21 +116,26 @@ class _CropImageToolState extends State<CropImageTool> {
   }
 
   Future<void> setProfile() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
     try {
       TaskSnapshot task = await FirebaseStorage.instance
           .ref(FirebaseAuth.instance.currentUser!.uid)
           .child("profileImage")
           .child('profile')
           .putFile(imageFile!);
-      await task.ref.getDownloadURL().then((valueOfLinks) async => {
-            await FirebaseFirestore.instance
-                .collection("SportistanUsers")
-                .doc(widget.ref)
-                .update({}).then((value) => {Navigator.pop(context)})
-          });
+      await task.ref
+          .getDownloadURL()
+          .then((valueOfLinks) async => {
+                await FirebaseFirestore.instance
+                    .collection("SportistanUsers")
+                    .doc(widget.ref)
+                    .update({'profileImageLink': valueOfLinks.toString()}),
+                preferences.setString(
+                    'profileImageLink', valueOfLinks.toString())
+              })
+          .then((value) => {Navigator.pop(context)});
     } catch (e) {
       setProfileLoader.value = false;
-
       return;
     }
   }

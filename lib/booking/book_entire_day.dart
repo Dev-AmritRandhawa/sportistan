@@ -1,5 +1,7 @@
+import 'dart:io';
+
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:http/http.dart' as http;
-import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,13 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:intl/intl.dart';
-import 'package:sportistan/booking/payment_mode.dart';
+import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:sportistan/booking/unique.dart';
-
-import '../payment/sportistan_credit.dart';
+import 'package:sportistan/payment/gateway.dart';
 import '../widgets/errors.dart';
 import '../widgets/page_route.dart';
-import 'book_a_slot.dart';
 import 'booking_entire_day_info.dart';
 
 class BookEntireDay extends StatefulWidget {
@@ -22,10 +22,11 @@ class BookEntireDay extends StatefulWidget {
   final String groundID;
   final String groundName;
 
-  const BookEntireDay({super.key,
-    required this.date,
-    required this.groundID,
-    required this.groundName});
+  const BookEntireDay(
+      {super.key,
+      required this.date,
+      required this.groundID,
+      required this.groundName});
 
   @override
   State<BookEntireDay> createState() => _BookEntireDayState();
@@ -40,10 +41,16 @@ class _BookEntireDayState extends State<BookEntireDay> {
   ValueNotifier<bool> listShow = ValueNotifier<bool>(false);
   ValueNotifier<bool> switchBuilder = ValueNotifier<bool>(false);
   ValueNotifier<bool> amountUpdater = ValueNotifier<bool>(false);
+  ValueNotifier<bool> panelLoad = ValueNotifier<bool>(false);
+  ValueNotifier<bool> checkBoxListener = ValueNotifier<bool>(true);
 
   bool updateSmsAlert = true;
 
-  String? refID;
+  late num finalDeduction;
+
+  late num serviceChargePay;
+
+  late String refID;
 
   @override
   void initState() {
@@ -53,56 +60,75 @@ class _BookEntireDayState extends State<BookEntireDay> {
 
   @override
   void dispose() {
-    teamControllerA.dispose();
-    numberControllerA.dispose();
-    notesTeamA.dispose();
-    nameControllerA.dispose();
+    numberControllerAA.dispose();
+    notesTeamAA.dispose();
+    nameControllerAA.dispose();
     super.dispose();
   }
 
-  TextEditingController teamControllerA = TextEditingController();
-  TextEditingController numberControllerA = TextEditingController();
-  TextEditingController nameControllerA = TextEditingController();
-  GlobalKey<FormState> nameKeyA = GlobalKey<FormState>();
-  GlobalKey<FormState> numberKeyA = GlobalKey<FormState>();
-  GlobalKey<FormState> teamControllerKeyA = GlobalKey<FormState>();
-  TextEditingController notesTeamA = TextEditingController();
+  PanelController pc = PanelController();
+  TextEditingController numberControllerAA = TextEditingController();
+  TextEditingController nameControllerAA = TextEditingController();
+  GlobalKey<FormState> nameKeyAA = GlobalKey<FormState>();
+  GlobalKey<FormState> numberKeyAA = GlobalKey<FormState>();
+  TextEditingController notesTeamAA = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CupertinoButton(
+              color: Colors.indigo,
+              child: const Text("Book For Entire Day"),
+              onPressed: () {
+                if (nameKeyAA.currentState!.validate() &
+                    numberKeyAA.currentState!.validate() ) {
+                  _checkBalance();
+                } else {
+                  Errors.flushBarInform(
+                      "Please Fill The Details", context, "Error");
+                }
+              }),
+        ),
         appBar: AppBar(
             foregroundColor: Colors.black54,
             backgroundColor: Colors.white,
             elevation: 0,
             title: const Text("Book for Entire Day")),
-        body: SafeArea(
-            child: ValueListenableBuilder(
-              valueListenable: listShow,
-              builder: (context, value, child) {
-                return value
-                    ? SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      const Text("Entire Day Price",
-                          style:
-                          TextStyle(fontSize: 16, fontFamily: "DMSans")),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text('Rs.${entireDayAmount.toString()}',
-                            style: const TextStyle(fontSize: 24)),
+        body: SlidingUpPanel(
+          panelBuilder: () => panel(),
+          minHeight: 0,
+          maxHeight: MediaQuery.of(context).size.height,
+          controller: pc,
+          body: SafeArea(
+              child: ValueListenableBuilder(
+            valueListenable: listShow,
+            builder: (context, value, child) {
+              return value
+                  ? SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        children: [
+                          const Text("Entire Day Price",
+                              style: TextStyle(
+                                  fontSize: 16, fontFamily: "DMSans")),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('Rs.${entireDayAmount.toString()}',
+                                style: const TextStyle(fontSize: 24)),
+                          ),
+                          dataList()
+                        ],
                       ),
-                      dataList()
-                    ],
-                  ),
-                )
-                    : const Center(
-                    child: CircularProgressIndicator(
+                    )
+                  : const Center(
+                      child: CircularProgressIndicator(
                       strokeWidth: 1,
                     ));
-              },
-            )));
+            },
+          )),
+        ));
   }
 
   dataList() {
@@ -127,9 +153,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
                   Padding(
                     padding: const EdgeInsets.only(right: 8, left: 8),
                     child: Text(
-                        "${DateFormat.yMMMd().format(
-                            DateTime.parse(widget.date))} (${DateFormat.EEEE()
-                            .format(DateTime.parse(widget.date))})",
+                        "${DateFormat.yMMMd().format(DateTime.parse(widget.date))} (${DateFormat.EEEE().format(DateTime.parse(widget.date))})",
                         style: const TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
@@ -137,10 +161,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
                   ),
                   Container(
                     width: double.infinity,
-                    height: MediaQuery
-                        .of(context)
-                        .size
-                        .height / 12,
+                    height: MediaQuery.of(context).size.height / 12,
                     alignment: Alignment.topCenter,
                     child: ListView.builder(
                         shrinkWrap: true,
@@ -166,10 +187,9 @@ class _BookEntireDayState extends State<BookEntireDay> {
                                       bookings.slotTime,
                                       style: TextStyle(
                                           color: Colors.black54,
-                                          fontSize: MediaQuery
-                                              .of(context)
-                                              .size
-                                              .width /
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
                                               30),
                                     ),
                                   ),
@@ -189,49 +209,13 @@ class _BookEntireDayState extends State<BookEntireDay> {
                   color: Colors.grey.shade100,
                   child: Column(
                     children: [
+
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Form(
-                          key: teamControllerKeyA,
+                          key: nameKeyAA,
                           child: SizedBox(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width / 1.2,
-                            child: TextFormField(
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return "Team name required.";
-                                } else if (value.length <= 2) {
-                                  return "Enter Correct Name.";
-                                } else {
-                                  return null;
-                                }
-                              },
-                              controller: teamControllerA,
-                              onChanged: (data) {
-                                nameKeyA.currentState!.validate();
-                              },
-                              decoration: const InputDecoration(
-                                  fillColor: Colors.white,
-                                  border: InputBorder.none,
-                                  errorStyle: TextStyle(color: Colors.red),
-                                  labelText: "Team Name*",
-                                  filled: true,
-                                  labelStyle: TextStyle(color: Colors.black)),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Form(
-                          key: nameKeyA,
-                          child: SizedBox(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width / 1.2,
+                            width: MediaQuery.of(context).size.width / 1.2,
                             child: TextFormField(
                               validator: (value) {
                                 if (value!.isEmpty) {
@@ -242,9 +226,9 @@ class _BookEntireDayState extends State<BookEntireDay> {
                                   return null;
                                 }
                               },
-                              controller: nameControllerA,
+                              controller: nameControllerAA,
                               onChanged: (data) {
-                                nameKeyA.currentState!.validate();
+                                nameKeyAA.currentState!.validate();
                               },
                               decoration: const InputDecoration(
                                   fillColor: Colors.white,
@@ -260,12 +244,9 @@ class _BookEntireDayState extends State<BookEntireDay> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Form(
-                          key: numberKeyA,
+                          key: numberKeyAA,
                           child: SizedBox(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width / 1.2,
+                            width: MediaQuery.of(context).size.width / 1.2,
                             child: TextFormField(
                               validator: (value) {
                                 if (value!.isEmpty) {
@@ -276,9 +257,9 @@ class _BookEntireDayState extends State<BookEntireDay> {
                                   return null;
                                 }
                               },
-                              controller: numberControllerA,
+                              controller: numberControllerAA,
                               onChanged: (data) {
-                                numberKeyA.currentState!.validate();
+                                numberKeyAA.currentState!.validate();
                               },
                               keyboardType: TextInputType.phone,
                               inputFormatters: [
@@ -291,28 +272,27 @@ class _BookEntireDayState extends State<BookEntireDay> {
                                   prefixIcon: IconButton(
                                       onPressed: () {
                                         checkPermissionForContacts(
-                                            numberControllerA);
+                                            numberControllerAA);
                                       },
                                       icon: const Icon(Icons.contacts,
                                           color: Colors.blue)),
                                   fillColor: Colors.white,
                                   border: InputBorder.none,
                                   errorStyle:
-                                  const TextStyle(color: Colors.red),
+                                      const TextStyle(color: Colors.red),
                                   filled: true,
                                   labelText: "Contact Number*",
                                   labelStyle:
-                                  const TextStyle(color: Colors.black)),
+                                      const TextStyle(color: Colors.black)),
                             ),
                           ),
                         ),
                       ),
-
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: SizedBox(
                           child: TextFormField(
-                            controller: notesTeamA,
+                            controller: notesTeamAA,
                             decoration: const InputDecoration(
                               fillColor: Colors.white,
                               border: InputBorder.none,
@@ -321,63 +301,17 @@ class _BookEntireDayState extends State<BookEntireDay> {
                               hintText: "Notes (Optional)",
                               hintStyle: TextStyle(color: Colors.black45),
                               contentPadding:
-                              EdgeInsets.symmetric(vertical: 40),
+                                  EdgeInsets.symmetric(vertical: 40),
                             ),
                           ),
                         ),
-                      ),
-                      ListView(
-                        physics: const BouncingScrollPhysics(),
-                        shrinkWrap: true,
-                        addAutomaticKeepAlives: true,
-                        children: <Widget>[
-                          Content(
-                            title: 'Choose Mode Of Payment',
-                            child: ChipsChoice<String>.single(
-                              value: PaymentMode.type,
-                              onChanged: (val) =>
-                                  setState(() => PaymentMode.type = val),
-                              choiceItems: C2Choice.listFrom<String, String>(
-                                source: PaymentMode.paymentOptions,
-                                value: (i, v) => v,
-                                label: (i, v) => v,
-                                tooltip: (i, v) => v,
-                              ),
-                              choiceCheckmark: true,
-                              choiceStyle: C2ChipStyle.filled(
-                                color: Colors.blue,
-                                selectedStyle: const C2ChipStyle(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(25),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
                 ),
               ),
-              CupertinoButton(
-                  color: Colors.indigo,
-                  child: const Text("Book For Entire Day"),
-                  onPressed: () {
-                    if (nameKeyA.currentState!.validate() &
-                    numberKeyA.currentState!.validate() &
-                    teamControllerKeyA.currentState!.validate()) {
-                      _checkBalance();
-                    } else {
-                      Errors.flushBarInform(
-                          "Please Fill The Details", context, "Error");
-                    }
-                  }),
               SizedBox(
-                height: MediaQuery
-                    .of(context)
-                    .size
-                    .height / 8,
+                height: MediaQuery.of(context).size.height / 8,
               )
             ],
           ),
@@ -390,9 +324,10 @@ class _BookEntireDayState extends State<BookEntireDay> {
   late num entireDayAmount;
   late num balance;
   late num partnerCommission;
+  late num serviceCharge;
   late String groundType;
-  late num advancePay;
-  late num updatedBalance;
+  late String name;
+  late num result;
 
   Future<void> _checkBalance() async {
     try {
@@ -400,21 +335,386 @@ class _BookEntireDayState extends State<BookEntireDay> {
           .collection('SportistanUsers')
           .where('userID', isEqualTo: _auth.currentUser!.uid)
           .get()
-          .then((value) =>
-      {
-        balance = value.docChanges.first.doc.get('sportistanCredits'),
-      });
+          .then((value) => {
+                balance = value.docChanges.first.doc.get('sportistanCredit'),
+                refID = value.docChanges.first.doc.id,
+                name = value.docChanges.first.doc.get('name'),
+              });
 
-      double result = entireDayAmount / 100;
-      advancePay = result * partnerCommission.toInt();
-      if (advancePay <= balance) {
-        createBooking();
-      } else {
-        showError();
-      }
+      result = entireDayAmount / 100;
+      serviceCharge = result * partnerCommission.toInt();
+
+      pc.open();
+      panelLoad.value = true;
     } catch (e) {
       return;
     }
+  }
+
+  panel() {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: ValueListenableBuilder(
+          valueListenable: panelLoad,
+          builder: (context, value, child) => value
+              ? Column(children: [
+                  const Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          'Payment Summary',
+                          style: TextStyle(
+                              fontFamily: "DMSans",
+                              fontSize: 25,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      child: Column(children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Date',
+                                style: TextStyle(
+                                  fontFamily: "DMSans",
+                                  fontSize: 20,
+                                  color: Colors.black,
+                                ),
+                                softWrap: true,
+                              ),
+                              Text(
+                                DateFormat.yMMMMEEEEd()
+                                    .format(DateTime.parse((widget.date))),
+                                style: const TextStyle(
+                                  fontFamily: "DMSans",
+                                  fontSize: 20,
+                                  color: Colors.black,
+                                ),
+                                softWrap: true,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Sub Total",
+                          style: TextStyle(
+                            fontFamily: "DMSans",
+                            fontSize: 18,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        Text(
+                          "₹$entireDayAmount",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "GST",
+                          style: TextStyle(
+                            fontFamily: "DMSans",
+                            fontSize: 18,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        Text(
+                          "₹0",
+                          style: TextStyle(
+                            fontSize: 22,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Grand Total",
+                          style: TextStyle(
+                            fontFamily: "DMSans",
+                            fontSize: 18,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          "₹$entireDayAmount",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Payable Later",
+                          style: TextStyle(
+                            fontFamily: "DMSans",
+                            fontSize: 18,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        Text(
+                          "₹${entireDayAmount - serviceCharge}",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Service Charged",
+                          style: TextStyle(
+                            fontFamily: "DMSans",
+                            fontSize: 18,
+                            color: Colors.orangeAccent,
+                          ),
+                        ),
+                        Text(
+                          "₹$serviceCharge",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            color: Colors.orangeAccent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Row(
+                          children: [
+                            Text(
+                              "Payable Now",
+                              style: TextStyle(
+                                fontFamily: "DMSans",
+                                fontSize: 18,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            ValueListenableBuilder(
+                              valueListenable: checkBoxListener,
+                              builder: (context, value, child) {
+                                serviceChargePay = serviceCharge;
+                                if (value) {
+                                  if (serviceChargePay <= balance) {
+                                    serviceChargePay = 0;
+
+                                    finalDeduction = balance - serviceChargePay;
+                                  } else {
+                                    serviceChargePay =
+                                        serviceChargePay - balance;
+                                    finalDeduction = serviceChargePay - balance;
+                                  }
+                                } else {
+                                  finalDeduction = balance;
+                                }
+
+                                return value
+                                    ? Text(
+                                        "₹$serviceChargePay ",
+                                        style: const TextStyle(
+                                          fontSize: 22,
+                                          color: Colors.green,
+                                        ),
+                                      )
+                                    : Text(
+                                        "₹$serviceCharge",
+                                        style: const TextStyle(
+                                          fontSize: 22,
+                                          color: Colors.green,
+                                        ),
+                                      );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  ValueListenableBuilder(
+                    valueListenable: checkBoxListener,
+                    builder: (context, value, child) => value
+                        ? const Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                                Padding(
+                                  padding: EdgeInsets.only(right: 8.0),
+                                  child: Text('Credits Applied',
+                                      style: TextStyle(color: Colors.green)),
+                                )
+                              ])
+                        : const Text(''),
+                  ),
+                  Card(
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(left: 8),
+                            child: Text('Sportistan Credits'),
+                          ),
+                          Row(
+                            children: [
+                              Text('₹$balance'),
+                              ValueListenableBuilder(
+                                valueListenable: checkBoxListener,
+                                builder: (context, valueBox, child) => Checkbox(
+                                    activeColor: Colors.green,
+                                    value: valueBox,
+                                    onChanged: (v) {
+                                      checkBoxListener.value = v!;
+                                    }),
+                              ),
+                            ],
+                          ),
+                        ]),
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height / 8),
+                  CupertinoButton(
+                      color: Colors.green,
+                      onPressed: () async {
+                        if (serviceChargePay == 0) {
+                          await createBooking();
+                        } else {
+                          if (Platform.isAndroid) {
+                            final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Gateway(
+                                    amount: serviceChargePay.toString(),
+                                    groundID:
+                                        FirebaseAuth.instance.currentUser!.uid,
+                                  ),
+                                ));
+
+                            if (result) {
+                              if (mounted) {
+                                createBooking();
+                              }
+                            } else {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text("Payment Failed")));
+                              }
+                            }
+                          } else {
+                            final result = await Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) => Gateway(
+                                    amount: serviceChargePay.toString(),
+                                    groundID:
+                                        FirebaseAuth.instance.currentUser!.uid,
+                                  ),
+                                ));
+                            if (result) {
+                              if (mounted) {
+                                createBooking();
+                              }
+                            } else {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text("Payment Failed")));
+                              }
+                            }
+                          }
+                        }
+                      },
+                      child: ValueListenableBuilder(
+                          valueListenable: checkBoxListener,
+                          builder: (context, value, child) => serviceChargePay ==
+                                  0
+                              ? const Text('Book Now')
+                              : Text(
+                                  'Pay ₹${serviceChargePay.round().toString()}'))),
+                  TextButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (ctx) {
+                              return const Column(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('Refund & Cancellation Policy',
+                                        style: TextStyle(
+                                            fontSize: 22, color: Colors.red)),
+                                  ),
+                                  Icon(Icons.warning, color: Colors.orange),
+                                  Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                        'The booking amount is non-refundable if the booking is cancelled rest of the payment must be paid before the start of booked slot paid.\nRain policy for outdoor sports\nif rain comes before the start of booked slot time then 100% of booking amount will be refunded to your sportistan wallet.\nif rain comes before the half time of booked slot ,then half payment (50%) will be charged of that particular booking & 50% will be refunded by ground owner.\nif rain comes after half time of booked slot, then customer has to pay 100 % of booked slot & no amount will be refunded.',
+                                        style: TextStyle(
+                                            fontFamily: "DMSans",
+                                            fontSize: 16)),
+                                  )
+                                ],
+                              );
+                            });
+                      },
+                      child: const Text(
+                        'View Cancellation Policy',
+                        style: TextStyle(fontFamily: "DMSans", fontSize: 16),
+                      )),
+                ])
+              : const CircularProgressIndicator(),
+        ),
+      ),
+    );
   }
 
   Future<void> getAllSlots() async {
@@ -422,16 +722,14 @@ class _BookEntireDayState extends State<BookEntireDay> {
         .collection("SportistanPartners")
         .where('groundID', isEqualTo: widget.groundID)
         .get()
-        .then((value) =>
-    {
-      allData = value.docChanges.first.doc
-          .get(DateFormat.EEEE().format(DateTime.parse(widget.date))),
-      refID = value.docChanges.first.doc.id,
-      partnerCommission = value.docChanges.first.doc.get('commission'),
-      groundType = value.docChanges.first.doc.get('groundType'),
-      entireDayAmount = value.docChanges.first.doc.get(
-          '${DateFormat.EEEE().format(DateTime.parse(widget.date))}EntireDay'),
-    });
+        .then((value) => {
+              allData = value.docChanges.first.doc
+                  .get(DateFormat.EEEE().format(DateTime.parse(widget.date))),
+              partnerCommission = value.docChanges.first.doc.get('commission'),
+              groundType = value.docChanges.first.doc.get('groundType'),
+              entireDayAmount = num.parse(value.docChanges.first.doc.get(
+                  '${DateFormat.EEEE().format(DateTime.parse(widget.date))}EntireDay')),
+            });
 
     for (int j = 0; j < allData.length; j++) {
       if (allData.isNotEmpty) {
@@ -444,6 +742,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
           slotTime: allData[j]["time"],
           slotPrice: allData[j]["price"],
           feesDue: allData[j]["price"],
+          nonFormattedTime: allData[j]["nonFormattedTime"],
         ));
       }
     }
@@ -459,7 +758,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
     final granted = await FlutterContactPicker.hasPermission();
     if (granted) {
       final PhoneContact contact =
-      await FlutterContactPicker.pickPhoneContact();
+          await FlutterContactPicker.pickPhoneContact();
       setState(() {
         _phoneContact = contact;
       });
@@ -487,18 +786,38 @@ class _BookEntireDayState extends State<BookEntireDay> {
   String groupID = UniqueID.generateRandomString();
 
   Future<void> createBooking() async {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text("Booking is creating"),
-      backgroundColor: Colors.green,
-    ));
-
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            const Text("Please Wait",
+                style: TextStyle(fontFamily: "DMSans", fontSize: 22)),
+            Image.asset('assets/logo.png',
+                height: MediaQuery.of(context).size.height / 8),
+            AnimatedTextKit(animatedTexts: [
+              TyperAnimatedText("We are confirming your booking..",
+                  textStyle: const TextStyle(fontSize: 22)),
+            ]),
+            const CircularProgressIndicator(
+                strokeWidth: 1, color: Colors.green),
+            CupertinoButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Cancel'))
+          ],
+        );
+      },
+    );
     for (int i = 0; i < allData.length; i++) {
       bookingID.add(UniqueID.generateRandomString());
       includeSlots.add(allData[i]["time"]);
     }
     for (int j = 0; j < allData.length; j++) {
       await _server.collection("GroundBookings").add({
-        'bookingPerson': 'Ground Owner',
+        'bookingPerson': name,
         'groundName': widget.groundName,
         'bookingCreated': DateTime.parse(widget.date),
         'bookedAt': DateTime.now(),
@@ -509,81 +828,53 @@ class _BookEntireDayState extends State<BookEntireDay> {
         'entireDayBooking': true,
         'groupID': groupID,
         'shouldCountInBalance': false,
-        'bookingCommissionCharged': advancePay,
+        'bookingCommissionCharged': serviceCharge,
         'entireDayBookingID': bookingID,
         'includeSlots': includeSlots,
-        'feesDue': entireDayAmount  - advancePay,
+        'feesDue': entireDayAmount - serviceCharge,
         'ratingGiven': false,
         'rating': 3.0,
         'TeamA': 'Not Applicable',
         'TeamB': "Not Applicable",
-        'advancePayment':
-        advancePay,
+        'advancePayment': serviceCharge,
         'bothTeamBooked': true,
         'groundID': widget.groundID,
         "teamA": {
-          'teamName': teamControllerA.value.text,
-          'personName': nameControllerA.value.text,
-          'phoneNumber': numberControllerA.value.text,
-          "notesTeamA": notesTeamA.value.text.isNotEmpty
-              ? notesTeamA.value.text.toString()
+          'teamName': '${nameControllerAA.value.text} Team',
+          'personName': nameControllerAA.value.text,
+          'phoneNumber': numberControllerAA.value.text,
+          "notesTeamA": notesTeamAA.value.text.isNotEmpty
+              ? notesTeamAA.value.text.toString()
               : "",
         },
         "teamB": {
-          'teamName': teamControllerA.value.text,
-          'personName': nameControllerA.value.text,
-          'phoneNumber': numberControllerA.value.text,
-          "notesTeamB": notesTeamA.value.text.toString(),
+          'teamName': '${nameControllerAA.value.text} Team',
+          'personName': nameControllerAA.value.text,
+          'phoneNumber': numberControllerAA.value.text,
+          "notesTeamB": notesTeamAA.value.text.toString(),
         },
-        'slotPrice':entireDayAmount,
+        'slotPrice': entireDayAmount,
         'slotStatus': "Booked",
         'slotTime': allData[j]["time"],
+        'nonFormattedTime': allData[j]["nonFormattedTime"],
         'slotID': allData[j]["slotID"],
         'bookingID': bookingID[j],
         'date': widget.date,
       });
     }
-    await _server
-        .collection('SportistanUsers')
-        .where('userID', isEqualTo: _auth.currentUser!.uid)
-        .get()
-        .then((value) =>
-    {
-      updatedBalance = value.docChanges.first.doc.get('sportistanCredits'),
-    }).then((value) async => {
-      await _server
-          .collection("SportistanUsers")
-          .doc(refID)
-          .update({'sportistanCredit': updatedBalance - advancePay}).then(
-              (value) =>
-          {
-            if (mounted) {alertUser(bookingID: bookingID[0])}
-          })
-    });
-
+    await serviceBook();
   }
 
   Future<void> sendSms({required String number}) async {
     String url =
-        'http://api.bulksmsgateway.in/sendmessage.php?user=sportslovez&password=7788330&mobile=$number&message=Your Booking is Confirmed at ${widget
-        .groundName} on ${DateFormat.yMMMd().format(DateTime.parse(widget
-        .date))} for Entire Day Thanks for Choosing Facility on Sportistan&sender=SPTNOT&type=3&template_id=1407170003612415391';
-    await http.post(Uri.parse(url));
-  }
-
-  Future<void> alertUser({required String bookingID}) async {
-    if (updateSmsAlert) {
-      if (numberControllerA.value.text.isNotEmpty) {
-        await sendSms(number: numberControllerA.value.text);
-        if (numberControllerA.value.text.isNotEmpty) {
-          if (numberControllerA.value.text != numberControllerA.value.text) {
-            await sendSms(number: numberControllerA.value.text);
-          }
-        }
-      }
+        'http://api.bulksmsgateway.in/sendmessage.php?user=sportslovez&password=7788330&mobile=$number&message=Your Booking is Confirmed at ${widget.groundName} on ${DateFormat.yMMMd().format(DateTime.parse(widget.date))} for Entire Day Thanks for Choosing Facility on Sportistan&sender=SPTNOT&type=3&template_id=1407170003612415391';
+     try {
+      await http.post(Uri.parse(url));
+      moveToReceipt(bookingID: bookingID[0]);
+    } catch (e) {
+      moveToReceipt(bookingID: bookingID[0]);
     }
-    updateSmsAlert = false;
-    moveToReceipt(bookingID: bookingID);
+
   }
 
   moveToReceipt({required String bookingID}) async {
@@ -591,81 +882,15 @@ class _BookEntireDayState extends State<BookEntireDay> {
         context, BookingEntireDayInfo(bookingID: bookingID));
   }
 
-  void showError() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  "Low Balance",
-                  style: TextStyle(
-                      fontFamily: "DMSans", fontSize: 22, color: Colors.red),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  "Not Able to create booking due to low balance",
-                  style: TextStyle(fontFamily: "DMSans", fontSize: 16),
-                ),
-              ),
-              Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      widget.groundName,
-                      softWrap: true,
-                      style: const TextStyle(
-                          fontFamily: "DMSans", fontSize: 16),
-                    ),
-                  )),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Rs.',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  Text(
-                    balance.toString(),
-                    style:
-                    const TextStyle(fontSize: 50, color: Colors.redAccent),
-                  ),
-                ],
-              ),
-              CupertinoButton(
-                  color: Colors.green,
-                  child: const Text("Add Credits"),
-                  onPressed: () {
-                    PageRouter.push(context, const SportistanCredit());
-                  }),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Our commitment to assist you better Please Pay ${advancePay
-                      .toString()}  Please add credits to continue booking services on Sportistan to Complete this Booking",
-                  style: const TextStyle(
-                      fontSize: 22,
-                      color: Colors.black54,
-                      fontFamily: "Nunito"),
-                ),
-              ),
-              SizedBox(
-                height: MediaQuery
-                    .of(context)
-                    .size
-                    .height / 5,
-              )
-            ],
-          ),
-        );
-      },
-    );
+  Future<void> serviceBook() async {
+    if (checkBoxListener.value) {
+      await _server.collection("SportistanUsers").doc(refID).update({
+        'sportistanCredit': balance - serviceChargePay,
+      });
+    } else {
+      sendSms(number: numberControllerAA.value.text.trim().toString());
+    }
+    sendSms(number: numberControllerAA.value.text.trim().toString());
   }
 }
 
@@ -676,17 +901,20 @@ class MySlots {
   final int slotPrice;
   final int feesDue;
   final String slotStatus;
+  final String nonFormattedTime;
   final String slotTime;
   final String bookingID;
 
-  MySlots({required this.slotID,
-    required this.group,
-    required this.feesDue,
-    required this.date,
-    required this.bookingID,
-    required this.slotPrice,
-    required this.slotStatus,
-    required this.slotTime});
+  MySlots(
+      {required this.slotID,
+      required this.group,
+      required this.feesDue,
+      required this.date,
+      required this.bookingID,
+      required this.slotPrice,
+      required this.slotStatus,
+      required this.nonFormattedTime,
+      required this.slotTime});
 
   Map groupItemsByGroup(List items) {
     return groupBy(items, (item) => item.group);

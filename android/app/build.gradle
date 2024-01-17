@@ -74,15 +74,15 @@ android {
             // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
             minSdkVersion 24
             targetSdkVersion flutter.targetSdkVersion
-            versionCode flutterVersionCode.toInteger()
-            versionName flutterVersionName
+            versionCode=13
+            versionName=13
         }
 
         signingConfigs {
             release {
-                storeFile file("C:/Users/amrit/AndroidStudioProjects/sportistan/android/app/upload-keystore.jks")
+                storeFile file("C:/Users/amrit/StudioProjects/sportistan/android/app/upload.jks")
                 storePassword "123456"
-                keyAlias "upload"
+                keyAlias "androiddebugkey"
                 keyPassword "123456"
             }
         }
@@ -99,6 +99,7 @@ android {
     }
 
     dependencies {
-        implementation 'in.payu:phonepe-intent:1.6.1'
+        implementation 'phonepe.intentsdk.android.release:IntentSDK:2.4.1'
+        implementation 'com.google.android.recaptcha:recaptcha:18.4.0'
     }
 }

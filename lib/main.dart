@@ -5,10 +5,13 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sportistan/authentication/set_location.dart';
 import 'package:sportistan/widgets/errors.dart';
 import 'package:sportistan/widgets/local_notifications.dart';
 import 'package:sportistan/widgets/page_route.dart';
@@ -88,12 +91,6 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  final _auth = FirebaseAuth.instance;
-
-  final _server = FirebaseFirestore.instance;
-
-  bool isAccountOnHold = false;
-
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
@@ -106,52 +103,53 @@ class _MyHomePageState extends State<MyHomePage>
     super.dispose();
   }
 
+  final _auth = FirebaseAuth.instance;
+
+  final _server = FirebaseFirestore.instance;
+
+  bool isAccountOnHold = false;
+
+  late bool serverResult;
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback(
-            (_) => Future.delayed(const Duration(milliseconds: 3000), () async {
-          _auth.authStateChanges().listen((User? user) async {
-            if (user != null) {
-              try {
-                _server
-                    .collection("SportistanUsers")
-                    .where('userID', isEqualTo: _auth.currentUser!.uid)
-                    .get()
-                    .then((value) => {
-                  if (value.docChanges.isEmpty)
-                    {
-                      if (mounted)
-                        {
-                          PageRouter.pushRemoveUntil(
-                              context, const PhoneAuthentication())
-                        }
+        (_) => Future.delayed(const Duration(milliseconds: 3000), () async {
+              _auth.authStateChanges().listen((User? user) async {
+                if (user != null) {
+                  try {
+                    _server
+                        .collection("SportistanUsers")
+                        .where('userID', isEqualTo: _auth.currentUser!.uid)
+                        .get()
+                        .then((value) => {
+                              if (value.docChanges.isNotEmpty)
+                                {
+                                  if (value.docChanges.first.doc
+                                      .get('isAccountOnHold'))
+                                    {
+                                      PageRouter.pushRemoveUntil(
+                                          context, const ErrorAccountHold())
+                                    }
+                                  else
+                                    {checkLocation()}
+                                }
+                              else
+                                {_userStateSave()}
+                            });
+                  } on SocketException catch (e) {
+                    if (mounted) {
+                      Errors.flushBarInform(
+                          e.message, context, "Connectivity Error");
                     }
-                  else
-                    {
-                      if (mounted)
-                        {
-                          PageRouter.pushRemoveUntil(
-                              context,
-                              BeforeHome(
-                                value: value,
-                              ))
-                        }
-                    }
-                });
-              } on SocketException catch (e) {
-                if (mounted) {
-                  Errors.flushBarInform(
-                      e.message, context, "Connectivity Error");
+                  } catch (e) {
+                    return;
+                  }
+                } else {
+                  _userStateSave();
                 }
-                _userStateSave();
-              } catch (e) {
-                _userStateSave();
-              }
-            } else {
-              _userStateSave();
-            }
-          });
-        }));
+              });
+            }));
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -200,87 +198,73 @@ class _MyHomePageState extends State<MyHomePage>
       _moveToDecision(const OnBoard());
     }
   }
-}
 
-class BeforeHome extends StatefulWidget {
-  const BeforeHome({super.key, required this.value});
-
-  final QuerySnapshot<Map<String, dynamic>> value;
-
-  @override
-  State<BeforeHome> createState() => _BeforeHomeState();
-}
-
-class _BeforeHomeState extends State<BeforeHome> {
-  bool accountOnHold = false;
-  ValueNotifier<bool> accountOnHoldListener = ValueNotifier<bool>(false);
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback(
-            (_) => Future.delayed(const Duration(milliseconds: 3500), () async {
+  Future<void> checkLocation() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    bool? savedResult = preferences.getBool('isLocationSet');
+    if (savedResult != null) {
+      if (savedResult) {
+        if (mounted) {
+          PageRouter.pushRemoveUntil(context, const NavHome());
+        } else {
           if (mounted) {
-            checkHealth();
+            PageRouter.pushRemoveUntil(context, const SetLocation());
           }
-        }));
-    return Scaffold(
-        body: ValueListenableBuilder(
-          valueListenable: accountOnHoldListener,
-          builder: (context, value, child) => value
-              ? Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text("Your Account is On Hold",
-                    style: TextStyle(
-                      fontFamily: "DMSans",
-                      fontSize: 22,
-                    ),
-                    softWrap: true),
-              ),
-              Icon(Icons.warning,
-                  color: Colors.red,
-                  size: MediaQuery.of(context).size.height / 5),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                    "Your Account is On Hold Due to Some Reasons Please Contact Customer Support if You Think This is a Mistake Write an Email Support@Sportistan.co.in or Call +918591719905",
-                    style: TextStyle(fontFamily: "DMSans", fontSize: 16),
-                    softWrap: true),
-              ),
-            ],
-          )
-              : const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    strokeWidth: 1,
-                    color: Colors.green,
-                  )
-                ],
-              )),
-        ));
-  }
-
-  void checkHealth() {
-    for (int i = 0; i < widget.value.docChanges.length; i++) {
-      if (widget.value.docChanges[i].doc.get('isAccountOnHold')) {
-        accountOnHold = true;
-        accountOnHoldListener.value = true;
-        break;
-      } else {
-        continue;
+        }
+      }
+    } else {
+      if (mounted) {
+        PageRouter.pushRemoveUntil(context, const SetLocation());
       }
     }
-    if (!accountOnHold) {
-      PageRouter.pushRemoveUntil(context, const NavHome());
-    }
+  }
+}
+
+class ErrorAccountHold extends StatefulWidget {
+  const ErrorAccountHold({super.key});
+
+  @override
+  State<ErrorAccountHold> createState() => _ErrorAccountHoldState();
+}
+
+class _ErrorAccountHoldState extends State<ErrorAccountHold> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text("Your Account is On Hold",
+              style: TextStyle(
+                fontFamily: "DMSans",
+                fontSize: 22,
+              ),
+              softWrap: true),
+        ),
+        Icon(Icons.warning,
+            color: Colors.red, size: MediaQuery.of(context).size.height / 5),
+        const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+              "Your Account is On Hold Due to Some Reasons Please Contact Customer Support if You Think This is a Mistake Write an Email at Support@Sportistan.co.in, or can Call +918591719905",
+              style: TextStyle(
+                fontFamily: "DMSans",
+                fontSize: 18,
+              ),
+              softWrap: true),
+        ),
+        CupertinoButton(
+            color: Colors.green,
+            onPressed: () {
+              FlutterPhoneDirectCaller.callNumber("+918591719905");
+            },
+            child: const Text(
+              'Call Customer Support',
+              style: TextStyle(fontFamily: "DMSans"),
+            ))
+      ],
+    ));
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:sportistan/nav/home.dart';
+import 'package:sportistan/nav/main_page.dart';
 import 'package:sportistan/nav/nav_profile.dart';
 
 import 'nav_history.dart';
@@ -16,7 +16,7 @@ class _NavHomeState extends State<NavHome> {
   var _selectedIndex = 0;
 
   final _widgetOptions = [
-    const Home(),
+    const MainPage(),
     const NavHistory(),
     const NavProfile(),
   ];
@@ -33,8 +33,9 @@ class _NavHomeState extends State<NavHome> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 rippleColor: Colors.grey[300]!,
                 hoverColor: Colors.grey[100]!,
-                activeColor: Colors.teal,gap: MediaQuery.of(context).size.height/30,
-                iconSize: MediaQuery.of(context).size.height/30,
+                activeColor: Colors.teal,
+                gap: MediaQuery.of(context).size.height / 30,
+                iconSize: MediaQuery.of(context).size.height / 30,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 duration: const Duration(milliseconds: 400),

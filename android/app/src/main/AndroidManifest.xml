@@ -51,7 +51,7 @@
             android:value="false" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBeA3I5eNJkbzwRPc8cU1iDy50BrkcSPGM" />
+            android:value="AIzaSyCHJizjCjQBbAr1D6trmyKJPzOKyHGImZE" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher" />
@@ -62,16 +62,11 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="high_importance_channel" />
 
-        <!--        set as false maybe when in production-->
-        <meta-data
-            android:name="com.phonepe.android.sdk.isSimulator"
-            android:value="true" />
-        <!--        set as false to simulator which is now (True) when in production-->
-        <meta-data
-            android:name="com.phonepe.android.sdk.MerchantId"
-            android:value="PGTESTPAYUAT" />
 
-        <!--  <meta-data android:name="com.phonepe.android.sdk.AppId" android:value="appId"/>-->
+        <meta-data android:name="com.phonepe.android.sdk.isUAT" android:value="true"/>
+        <meta-data android:name="com.phonepe.android.sdk.isSimulator" android:value="true"/>
+        <meta-data android:name="com.phonepe.android.sdk.MerchantId" android:value="M1DWMSERHVFP"/>
+        <meta-data android:name="com.phonepe.android.sdk.AppId" android:value="b607c458044c489a9f51329e52aed81d"/>
 
     </application>
 </manifest>

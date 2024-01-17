@@ -29,12 +29,29 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>Sportistan needs access to your photo library to pick images.</string>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
+	<key>LSApplicationQueriesSchemes</key>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>Sportistan needs access to location to show grounds near you.</string>
+    <key>NSLocationTemporaryUsageDescriptionDictionary</key>
+    <dict>
+      <key>YourPurposeKey</key>
+      <string>Sportistan needs temporary location to show grounds near user.</string>
+    </dict>
+    <array>
+        <string>ppemerchantsdkv1</string>
+        <string>ppemerchantsdkv2</string>
+        <string>ppemerchantsdkv3</string>
+        <string>paytmmp</string>
+        <string>gpay</string>
+    </array>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
