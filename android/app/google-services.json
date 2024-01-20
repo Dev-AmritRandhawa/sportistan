@@ -42,10 +42,11 @@
               "client_type": 3
             },
             {
-              "client_id": "497512590176-h2v0qkgkp4bj4aodu56u8mnrgknd39cr.apps.googleusercontent.com",
+              "client_id": "497512590176-emgatrjgl53o998cgcb28ob11htk1j9k.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "co.in.sportistan.sportistan"
+                "bundle_id": "co.in.sportistan.sportistanAdmin",
+                "app_store_id": "6476261961"
               }
             }
           ]
@@ -89,10 +90,11 @@
               "client_type": 3
             },
             {
-              "client_id": "497512590176-h2v0qkgkp4bj4aodu56u8mnrgknd39cr.apps.googleusercontent.com",
+              "client_id": "497512590176-emgatrjgl53o998cgcb28ob11htk1j9k.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "co.in.sportistan.sportistan"
+                "bundle_id": "co.in.sportistan.sportistanAdmin",
+                "app_store_id": "6476261961"
               }
             }
           ]
@@ -136,10 +138,11 @@
               "client_type": 3
             },
             {
-              "client_id": "497512590176-h2v0qkgkp4bj4aodu56u8mnrgknd39cr.apps.googleusercontent.com",
+              "client_id": "497512590176-emgatrjgl53o998cgcb28ob11htk1j9k.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "co.in.sportistan.sportistan"
+                "bundle_id": "co.in.sportistan.sportistanAdmin",
+                "app_store_id": "6476261961"
               }
             }
           ]
