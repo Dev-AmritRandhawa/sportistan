@@ -16,7 +16,6 @@ import 'package:sportistan/widgets/errors.dart';
 import 'package:sportistan/widgets/local_notifications.dart';
 import 'package:sportistan/widgets/page_route.dart';
 import 'package:intl/date_symbol_data_local.dart';
-
 import 'authentication/authentication.dart';
 import 'firebase_options.dart';
 import 'nav/nav_home.dart';
@@ -57,7 +56,7 @@ Future<void> main() async {
 
   await FirebaseAppCheck.instance.activate(
       androidProvider: AndroidProvider.playIntegrity,
-      appleProvider: AppleProvider.appAttest);
+      appleProvider: AppleProvider.deviceCheck);
   initializeDateFormatting('en', '').then((value) => null);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {

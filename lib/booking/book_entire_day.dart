@@ -12,7 +12,7 @@ import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:intl/intl.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:sportistan/booking/unique.dart';
-import 'package:sportistan/payment/gateway.dart';
+import 'package:sportistan/payment/payment_gateway.dart';
 import '../widgets/errors.dart';
 import '../widgets/page_route.dart';
 import 'booking_entire_day_info.dart';
@@ -631,11 +631,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
                             final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => Gateway(
-                                    amount: serviceChargePay.toString(),
-                                    groundID:
-                                        FirebaseAuth.instance.currentUser!.uid,
-                                  ),
+                                  builder: (context) => const PaymentGateway(),
                                 ));
 
                             if (result) {
@@ -653,11 +649,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
                             final result = await Navigator.push(
                                 context,
                                 CupertinoPageRoute(
-                                  builder: (context) => Gateway(
-                                    amount: serviceChargePay.toString(),
-                                    groundID:
-                                        FirebaseAuth.instance.currentUser!.uid,
-                                  ),
+                                  builder: (context) => const PaymentGateway(),
                                 ));
                             if (result) {
                               if (mounted) {

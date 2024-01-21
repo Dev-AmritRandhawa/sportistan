@@ -952,6 +952,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
+  paytm_allinonesdk:
+    dependency: "direct main"
+    description:
+      name: paytm_allinonesdk
+      sha256: "6f6acfb4754371568126f23e8657c391c329be17e5956f0a84238afdd3f84eea"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.3"
   permission_handler:
     dependency: "direct main"
     description:
@@ -1008,14 +1016,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.2"
-  phonepe_payment_sdk:
-    dependency: "direct main"
-    description:
-      name: phonepe_payment_sdk
-      sha256: "1029f1d0ba9dd50a9e2d9194eb1f62d4efb93e227ed04a8e8de3c2ace7ee7c9b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   pigeon:
     dependency: transitive
     description:

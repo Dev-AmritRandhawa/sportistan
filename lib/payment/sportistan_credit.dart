@@ -5,8 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
-import 'package:sportistan/payment/gateway.dart';
+import 'package:sportistan/payment/payment_gateway.dart';
 import 'package:sportistan/widgets/page_route.dart';
+
 
 class SportistanCredit extends StatefulWidget {
   const SportistanCredit({super.key, required this.groundID});
@@ -206,11 +207,9 @@ class _SportistanCreditState extends State<SportistanCredit>
               color: Colors.green.shade900,
               onPressed: () {
                 if (addBalanceControllerKey.currentState!.validate()) {
-                  PageRouter.push(
-                      context,Gateway(
-                        amount: addBalanceController.value.text.toString(), groundID: FirebaseAuth.instance.currentUser!.uid,
-                      ));
-
+                    PageRouter.push(
+                        context,
+                        const PaymentGateway());
                 }
               },
               child: const Text('Add Credits')),
@@ -227,4 +226,3 @@ class _SportistanCreditState extends State<SportistanCredit>
     );
   }
 }
-

@@ -15,7 +15,7 @@ import 'package:sportistan/booking/booking_info.dart';
 import 'package:sportistan/booking/send_cloud_message.dart';
 import 'package:sportistan/booking/unique.dart';
 import 'package:sportistan/nav/nav_profile.dart';
-import 'package:sportistan/payment/gateway.dart';
+import 'package:sportistan/payment/payment_gateway.dart';
 import 'package:sportistan/widgets/errors.dart';
 import 'package:sportistan/widgets/page_route.dart';
 
@@ -1516,10 +1516,7 @@ class _BookASlotState extends State<BookASlot> {
                               final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => Gateway(
-                                      amount: newAmount.toString(),
-                                      groundID: FirebaseAuth
-                                          .instance.currentUser!.uid,
+                                    builder: (context) => const PaymentGateway(
                                     ),
                                   ));
 
@@ -1576,12 +1573,8 @@ class _BookASlotState extends State<BookASlot> {
                               final result = await Navigator.push(
                                   context,
                                   CupertinoPageRoute(
-                                    builder: (context) => Gateway(
-                                      amount: newAmount.toString(),
-                                      groundID: FirebaseAuth
-                                          .instance.currentUser!.uid,
-                                    ),
-                                  ));
+                                    builder: (context) => const PaymentGateway(
+                                  )));
                               if (result) {
                                 if (mounted) {
                                   showModalBottomSheet(
