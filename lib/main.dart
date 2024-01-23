@@ -12,6 +12,7 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sportistan/authentication/set_location.dart';
+import 'package:sportistan/payment/payment_gateway.dart';
 import 'package:sportistan/widgets/errors.dart';
 import 'package:sportistan/widgets/local_notifications.dart';
 import 'package:sportistan/widgets/page_route.dart';
@@ -61,7 +62,6 @@ Future<void> main() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     requestPermission();
-
     runApp(const MaterialApp(home: MyApp()));
   });
 }

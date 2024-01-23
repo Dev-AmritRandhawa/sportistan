@@ -866,12 +866,10 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - paytm_allinonesdk (1.2.3):
+    - Flutter
   - permission_handler_apple (9.1.1):
     - Flutter
-  - phonepe_payment_sdk (1.1.0):
-    - Flutter
-    - PhonePePayment (= 2.7.0)
-  - PhonePePayment (2.7.0)
   - PromisesObjC (2.3.1)
   - recaptcha_enterprise_flutter (18.4.0):
     - Flutter
@@ -908,8 +906,8 @@ DEPENDENCIES:
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - maps_launcher (from `.symlinks/plugins/maps_launcher/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - paytm_allinonesdk (from `.symlinks/plugins/paytm_allinonesdk/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
-  - phonepe_payment_sdk (from `.symlinks/plugins/phonepe_payment_sdk/ios`)
   - recaptcha_enterprise_flutter (from `.symlinks/plugins/recaptcha_enterprise_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -945,7 +943,6 @@ SPEC REPOS:
     - GTMSessionFetcher
     - leveldb-library
     - nanopb
-    - PhonePePayment
     - PromisesObjC
     - RecaptchaEnterprise
     - RecaptchaInterop
@@ -986,10 +983,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/maps_launcher/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  paytm_allinonesdk:
+    :path: ".symlinks/plugins/paytm_allinonesdk/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
-  phonepe_payment_sdk:
-    :path: ".symlinks/plugins/phonepe_payment_sdk/ios"
   recaptcha_enterprise_flutter:
     :path: ".symlinks/plugins/recaptcha_enterprise_flutter/ios"
   share_plus:
@@ -1046,9 +1043,8 @@ SPEC CHECKSUMS:
   maps_launcher: 2e5b6a2d664ec6c27f82ffa81b74228d770ab203
   nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
+  paytm_allinonesdk: a1b94aca5388e70c6d8679b858d69932cda53698
   permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
-  phonepe_payment_sdk: 16c104c9a7f9a68a76133062fc739bf4244ee80d
-  PhonePePayment: 51a3452f22783502dc0c1c5ac3cd38e91609e851
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
   recaptcha_enterprise_flutter: 36a0ee0ae38b91309646bdde70e0f168bdf9361b
   RecaptchaEnterprise: dc302910b77963a0cc6f6908407e30b35268a755
