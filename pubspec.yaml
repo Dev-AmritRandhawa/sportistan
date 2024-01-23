@@ -79,6 +79,7 @@ dependencies:
   dots_indicator: ^3.0.0
   recaptcha_enterprise_flutter: ^18.4.0
   paytm_allinonesdk: ^1.2.3
+  cloud_functions: ^4.6.0
 
 
 dev_dependencies:
