@@ -631,7 +631,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
                             final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const PaymentGateway(),
+                                  builder: (context) => const Gateway(),
                                 ));
 
                             if (result) {
@@ -649,7 +649,7 @@ class _BookEntireDayState extends State<BookEntireDay> {
                             final result = await Navigator.push(
                                 context,
                                 CupertinoPageRoute(
-                                  builder: (context) => const PaymentGateway(),
+                                  builder: (context) => const Gateway(),
                                 ));
                             if (result) {
                               if (mounted) {

@@ -69,20 +69,20 @@ class _BookASlotState extends State<BookASlot> {
   GlobalKey<FormState> numberKeyA = GlobalKey<FormState>();
   GlobalKey<FormState> numberKeyB = GlobalKey<FormState>();
   GlobalKey<FormState> teamControllerKeyA = GlobalKey<FormState>();
-  GlobalKey<FormState> teamControllerKeyB = GlobalKey<FormState>();
-
   ValueNotifier<bool> checkBoxTeamB = ValueNotifier<bool>(false);
+
   ValueNotifier<bool> checkBoxListener = ValueNotifier<bool>(false);
   ValueNotifier<bool> showTeamB = ValueNotifier<bool>(false);
   ValueNotifier<bool> panelLoading = ValueNotifier<bool>(true);
   ValueNotifier<bool> hideData = ValueNotifier<bool>(false);
-
   bool amountUpdated = false;
 
   final _server = FirebaseFirestore.instance;
-  final _auth = FirebaseAuth.instance;
 
+  final _auth = FirebaseAuth.instance;
   TextEditingController notesTeamA = TextEditingController();
+
+  GlobalKey<FormState> teamControllerKeyB = GlobalKey<FormState>();
   TextEditingController notesTeamB = TextEditingController();
 
   late num updatedPrice;
@@ -1516,7 +1516,7 @@ class _BookASlotState extends State<BookASlot> {
                               final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const PaymentGateway(
+                                    builder: (context) => const Gateway(
                                     ),
                                   ));
 
@@ -1573,8 +1573,10 @@ class _BookASlotState extends State<BookASlot> {
                               final result = await Navigator.push(
                                   context,
                                   CupertinoPageRoute(
-                                    builder: (context) => const PaymentGateway(
-                                  )));
+                                    builder: (context) => const Gateway(
+                                  ))
+
+                              );
                               if (result) {
                                 if (mounted) {
                                   showModalBottomSheet(

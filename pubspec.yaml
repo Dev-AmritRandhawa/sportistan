@@ -75,12 +75,11 @@ dependencies:
   image_cropper: ^5.0.1
   image_picker: any
   crypto: ^3.0.3
+  encrypt: ^5.0.0
   algolia_helper_flutter: ^0.5.0
   dots_indicator: ^3.0.0
   recaptcha_enterprise_flutter: ^18.4.0
   paytm_allinonesdk: ^1.2.3
-  cloud_functions: ^4.6.0
-
 
 dev_dependencies:
   flutter_test:

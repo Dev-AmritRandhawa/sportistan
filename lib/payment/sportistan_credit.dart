@@ -209,7 +209,7 @@ class _SportistanCreditState extends State<SportistanCredit>
                 if (addBalanceControllerKey.currentState!.validate()) {
                     PageRouter.push(
                         context,
-                        const PaymentGateway());
+                         const Gateway());
                 }
               },
               child: const Text('Add Credits')),

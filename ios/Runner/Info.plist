@@ -2,32 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>NSAppTransportSecurity</key>
-    <dict>
-        <key>NSAllowsLocalNetworking</key>
-        <true/>
-    </dict>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
+	<key>GoogleUtilitiesAppDelegateProxyEnabled</key>
+    <false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-	<key>FLTEnableImpeller</key>
-    	<false/>
-    	<key>FirebaseAppDelegateProxyEnabled</key>
-    	<false/>
-    	<key>ITSAppUsesNonExemptEncryption</key>
-    	<false/>
-    	<key>NSAppTransportSecurity</key>
-        	<dict>
-        		<key>NSAllowsLocalNetworking</key>
-        		<true/>
-        	</dict>
-        	<key>NSContactsUsageDescription</key>
-        	<string>Instead of typing number pick and book a ground for users as ground owner</string>
-        	<key>NSLocationWhenInUseUsageDescription</key>
-        	<string>This app needs exact location to register sport ground by owners to get bookings &amp; easy direction for user to reach at correct spot.</string>
-        	<key>NSPhotoLibraryUsageDescription</key>
-        	<string>This app requires access to the photo library to register sports ground listing.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -59,8 +37,33 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1.0.0</string>
+	<key>FLTEnableImpeller</key>
+	<false/>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>ppemerchantsdkv1</string>
+		<string>ppemerchantsdkv2</string>
+		<string>ppemerchantsdkv3</string>
+		<string>paytmmp</string>
+		<string>gpay</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSContactsUsageDescription</key>
+	<string>Instead of typing number pick and book a ground for users as ground owner</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs exact location to register sport ground by owners to get bookings &amp; easy direction for user to reach at correct spot.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to the photo library to register sports ground listing.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
