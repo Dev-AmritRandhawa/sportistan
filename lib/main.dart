@@ -53,7 +53,7 @@ Future<void> registerFCM() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp();
 
   await FirebaseAppCheck.instance.activate(
       androidProvider: AndroidProvider.playIntegrity,
@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage>
     final bool? result = value.getBool('onBoarding');
     if (result != null) {
       if (result) {
-        _moveToDecision(const PhoneAuthentication());
+        _moveToDecision(const Gateway());
       } else {
         _moveToDecision(const OnBoard());
       }

@@ -36,7 +36,7 @@ class _GatewayState extends State<Gateway> {
   Future<void> makeRequest() async {
     const url =
         'https://us-central1-oursportistan.cloudfunctions.net/loginFunction'; // Replace with the actual URL of your Firebase Cloud Function
-    const customAmount = 200.0; // Replace with your custom amount
+    const customAmount = '1.00'; // Replace with your custom amount
     try {
       final response = await http.get(Uri.parse('$url?amount=$customAmount'));
       if (response.statusCode == 200) {
@@ -48,7 +48,7 @@ class _GatewayState extends State<Gateway> {
         };
 
         final data =
-            '{"body":{"requestType":"Payment","mid":"{SPORTS33075460479694}","websiteName":"{DEFAULT}","orderId":"$orderID","txnAmount":{"value":"1.00","currency":"INR"},"userInfo":{"custId":"${FirebaseAuth.instance.currentUser!.uid.toString()}"},"callbackUrl":"https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderID"},"head":{"signature":"{$signature}"}}';
+            '{"body":{"requestType":"Payment","mid":"{SPORTS33075460479694}","websiteName":"{DEFAULT}","orderId":"$orderID","txnAmount":{"value":"1.00","currency":"INR"},"userInfo":{"custId":"Kjhjhgughhghghghghgh"},"callbackUrl":"https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderID"},"head":{"signature":"$signature"}}';
 
         final url = Uri.parse(
             'https://securegw.paytm.in/theia/api/v1/initiateTransaction?mid=SPORTS33075460479694&orderId=$orderID');
@@ -56,7 +56,7 @@ class _GatewayState extends State<Gateway> {
         final res = await http.post(url, headers: headers, body: data);
 
         if (res.statusCode == 200) {
-          final responseData = json.decode(response.body);
+          final responseData = json.decode(res.body);
           print(responseData);
         }
       } else {
