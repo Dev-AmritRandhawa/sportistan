@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "850178543426",
-    "project_id": "oursportistan",
-    "storage_bucket": "oursportistan.appspot.com"
+    "project_number": "46491538923",
+    "project_id": "wearesportistan",
+    "storage_bucket": "wearesportistan.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:850178543426:android:1736c70f88375b68be02db",
+        "mobilesdk_app_id": "1:46491538923:android:799d87442f03ff56e775ae",
         "android_client_info": {
           "package_name": "co.in.sportistan.sportistan"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBVIJin9XVJXyRRGgm7642o2YN-bEQSvds"
+          "current_key": "AIzaSyBUXurIfsx08mrd-N43zmmvFYTplN8vzDI"
         }
       ],
       "services": {

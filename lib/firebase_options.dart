@@ -50,19 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBVIJin9XVJXyRRGgm7642o2YN-bEQSvds',
-    appId: '1:850178543426:android:1736c70f88375b68be02db',
-    messagingSenderId: '850178543426',
-    projectId: 'oursportistan',
-    storageBucket: 'oursportistan.appspot.com',
+    apiKey: 'AIzaSyBUXurIfsx08mrd-N43zmmvFYTplN8vzDI',
+    appId: '1:46491538923:android:799d87442f03ff56e775ae',
+    messagingSenderId: '46491538923',
+    projectId: 'wearesportistan',
+    storageBucket: 'wearesportistan.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDlnG3yh00deTx-3Asdc_vAKlnnrwYXaA8',
-    appId: '1:850178543426:ios:90b3cd2a69bc4c17be02db',
-    messagingSenderId: '850178543426',
-    projectId: 'oursportistan',
-    storageBucket: 'oursportistan.appspot.com',
+    apiKey: 'AIzaSyCILcToh41B5cY7K0IwMe_ZdVAHdwuIxek',
+    appId: '1:46491538923:ios:e796953049ad25e0e775ae',
+    messagingSenderId: '46491538923',
+    projectId: 'wearesportistan',
+    storageBucket: 'wearesportistan.appspot.com',
     iosBundleId: 'co.in.sportistan.sportistan',
   );
 }
