@@ -5,7 +5,8 @@ const {onRequest} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const {setGlobalOptions} = require("firebase-functions/v2");
 setGlobalOptions({maxInstances: 10});
-var crypto = require('crypto');
+const https = require('https');
+const crypto = require('crypto');
 
 class PaytmChecksum {
 
@@ -26,7 +27,7 @@ class PaytmChecksum {
 		}
 		return decrypted;
 	}
-	static generateSignature(params, key) {
+	static async generateSignature(params, key) {
 		if (typeof params !== "object" && typeof params !== "string") {
 			var error = "string or object expected, " + (typeof params) + " given.";
 			return Promise.reject(error);
@@ -94,25 +95,74 @@ class PaytmChecksum {
 		var hashString = PaytmChecksum.calculateHash(params, salt);
 		return PaytmChecksum.encrypt(hashString,key);
 	}
-	static async generateOrderID() {
-                // Generate a random order ID using timestamp and some randomness
-                const timestamp = new Date().getTime();
-                const randomValue = await PaytmChecksum.generateRandomString(8);
-                return `Order_${timestamp}_${randomValue}`;
-            }
 }
 PaytmChecksum.iv = '@@@@&&&&####$$$$';
 
-  exports.generateTxnChecksum = onRequest(async (request, response) => {
+exports.initiatePaytmTransaction = onRequest(async (req, res) => {
     try {
-      const orderID = request.body.orderID || (await PaytmChecksum.generateOrderID());
-      var paytmParams = {};
-      paytmParams["MID"] = "SPORTS33075460479694";
-      paytmParams["ORDERID"] = orderID;
-      const signature = await PaytmChecksum.generateSignature(paytmParams, 'IvfU#eX&#G4BBxYY');
-      response.status(200).json({orderID, paytmParams, signature });
+        // Assuming the request body contains the necessary parameters including amount
+        const { amount } = req.body;
+        const { userID } = req.body;
+
+        // Generate a unique order ID (you may want to implement your logic here)
+        const orderId = ORDERID_${Math.floor(Math.random() * 1000000)};
+
+        var paytmParams = {
+            body: {
+                "requestType": "Payment",
+                "mid": "SPORTS33075460479694",
+                "websiteName": "DEFAULT",
+                "orderId": orderId,
+                "callbackUrl": 'https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=' + orderId,
+                "txnAmount": {
+                    "value": amount.toString(),
+                    "currency": "INR",
+                },
+                "userInfo": {
+                    "custId": userID.toString(),
+                },
+            },
+        };
+
+        const checksum = await PaytmChecksum.generateSignature(JSON.stringify(paytmParams.body), "IvfU#eX&#G4BBxYY");
+
+        paytmParams.head = {
+            "signature": checksum,
+        };
+
+        var post_data = JSON.stringify(paytmParams);
+        const url = /theia/api/v1/initiateTransaction?mid=SPORTS33075460479694&orderId=${orderId};
+
+        var options = {
+            hostname: 'securegw.paytm.in',
+            port: 443,
+            path: url,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': post_data.length,
+            },
+        };
+
+        var response = "";
+        var post_req = https.request(options, function (post_res) {
+            post_res.on('data', function (chunk) {
+                response += chunk;
+            });
+
+           value orderIdAndResponse = {
+
+           };
+            post_res.on('end', function () {
+                console.log('Response: ', response);
+                res.status(200).send(response);
+            });
+        });
+
+        post_req.write(post_data);
+        post_req.end();
     } catch (error) {
-        console.error(error);
-        response.status(500).send('Internal Server Error');
+        console.error('Error:', error);
+        res.status(500).send('Internal Server Error'+error);
     }
-  });
+});

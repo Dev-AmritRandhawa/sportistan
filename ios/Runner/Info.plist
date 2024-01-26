@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>GoogleUtilitiesAppDelegateProxyEnabled</key>
-    <false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -34,6 +32,14 @@
 				<string>com.googleusercontent.apps.497512590176-h2v0qkgkp4bj4aodu56u8mnrgknd39cr</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>paytmSPORTS33075460479694</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1.0.0</string>
@@ -41,15 +47,16 @@
 	<false/>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
+	<key>GoogleUtilitiesAppDelegateProxyEnabled</key>
+	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
-		<string>ppemerchantsdkv1</string>
-		<string>ppemerchantsdkv2</string>
-		<string>ppemerchantsdkv3</string>
+		<string>paytm</string>
 		<string>paytmmp</string>
-		<string>gpay</string>
+		<string>tez</string>
+		<string>phonepe</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

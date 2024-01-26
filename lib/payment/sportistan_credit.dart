@@ -8,6 +8,8 @@ import 'package:lottie/lottie.dart';
 import 'package:sportistan/payment/payment_gateway.dart';
 import 'package:sportistan/widgets/page_route.dart';
 
+import '../booking/unique.dart';
+
 
 class SportistanCredit extends StatefulWidget {
   const SportistanCredit({super.key, required this.groundID});
@@ -209,7 +211,8 @@ class _SportistanCreditState extends State<SportistanCredit>
                 if (addBalanceControllerKey.currentState!.validate()) {
                     PageRouter.push(
                         context,
-                         const Gateway());
+                          Gateway(amount: addBalanceController.value.text.toString(), orderID: UniqueID.generateRandomString(), userID: FirebaseAuth.instance.currentUser!.uid,
+                         ),);
                 }
               },
               child: const Text('Add Credits')),

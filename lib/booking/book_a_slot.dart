@@ -1513,10 +1513,11 @@ class _BookASlotState extends State<BookASlot> {
                             await createBooking();
                           } else {
                             if (Platform.isAndroid) {
+
                               final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const Gateway(
+                                    builder: (context) =>  Gateway(amount: serverCommissionCharge.toString(), orderID: UniqueID.generateRandomString(), userID: FirebaseAuth.instance.currentUser!.uid,
                                     ),
                                   ));
 
@@ -1573,8 +1574,8 @@ class _BookASlotState extends State<BookASlot> {
                               final result = await Navigator.push(
                                   context,
                                   CupertinoPageRoute(
-                                    builder: (context) => const Gateway(
-                                  ))
+                                    builder: (context) =>  Gateway(amount: serverCommissionCharge.toString(), orderID: UniqueID.generateRandomString(), userID: FirebaseAuth.instance.currentUser!.uid,
+                                    ))
 
                               );
                               if (result) {

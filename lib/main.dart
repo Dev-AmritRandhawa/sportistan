@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage>
     final bool? result = value.getBool('onBoarding');
     if (result != null) {
       if (result) {
-        _moveToDecision(const Gateway());
+        _moveToDecision(const PhoneAuthentication());
       } else {
         _moveToDecision(const OnBoard());
       }

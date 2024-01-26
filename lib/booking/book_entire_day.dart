@@ -631,7 +631,8 @@ class _BookEntireDayState extends State<BookEntireDay> {
                             final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const Gateway(),
+                                  builder: (context) =>  Gateway(amount: serviceChargePay.toString(), orderID: UniqueID.generateRandomString(), userID: FirebaseAuth.instance.currentUser!.uid,
+                                  ),
                                 ));
 
                             if (result) {
@@ -649,7 +650,8 @@ class _BookEntireDayState extends State<BookEntireDay> {
                             final result = await Navigator.push(
                                 context,
                                 CupertinoPageRoute(
-                                  builder: (context) => const Gateway(),
+                                  builder: (context) =>  Gateway(amount: serviceChargePay.toString(), orderID: UniqueID.generateRandomString(), userID: FirebaseAuth.instance.currentUser!.uid,
+                                  ),
                                 ));
                             if (result) {
                               if (mounted) {
