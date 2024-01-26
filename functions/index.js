@@ -1,6 +1,10 @@
-"use strict";
-const functions = require('firebase-functions');
-
+"use strict"
+const {onCall} = require("firebase-functions/v2/https");
+const {onDocumentWritten} = require("firebase-functions/v2/firestore");
+const {onRequest} = require("firebase-functions/v2/https");
+const logger = require("firebase-functions/logger");
+const {setGlobalOptions} = require("firebase-functions/v2");
+setGlobalOptions({maxInstances: 10});
 var crypto = require('crypto');
 
 class PaytmChecksum {
@@ -90,30 +94,25 @@ class PaytmChecksum {
 		var hashString = PaytmChecksum.calculateHash(params, salt);
 		return PaytmChecksum.encrypt(hashString,key);
 	}
+	static async generateOrderID() {
+                // Generate a random order ID using timestamp and some randomness
+                const timestamp = new Date().getTime();
+                const randomValue = await PaytmChecksum.generateRandomString(8);
+                return `Order_${timestamp}_${randomValue}`;
+            }
 }
 PaytmChecksum.iv = '@@@@&&&&####$$$$';
-module.exports = PaytmChecksum;
 
-}
-
-PaytmChecksum.iv = '@@@@&&&&####$$$$';
-
-exports.loginFunction = functions.https.onRequest(async (req, res) => {
+  exports.generateTxnChecksum = onRequest(async (request, response) => {
     try {
-
-
-      const timestamp = new Date().getTime();
-      const randomValue = await PaytmChecksum.generateRandomString(5);
-      const orderID = "ID{timestamp}${randomValue}";
+      const orderID = request.body.orderID || (await PaytmChecksum.generateOrderID());
       var paytmParams = {};
-
-
       paytmParams["MID"] = "SPORTS33075460479694";
       paytmParams["ORDERID"] = orderID;
       const signature = await PaytmChecksum.generateSignature(paytmParams, 'IvfU#eX&#G4BBxYY');
-      res.status(200).json({orderID, paytmParams, signature });
+      response.status(200).json({orderID, paytmParams, signature });
     } catch (error) {
         console.error(error);
-        res.status(500).send('Internal Server Error');
+        response.status(500).send('Internal Server Error');
     }
-});
+  });

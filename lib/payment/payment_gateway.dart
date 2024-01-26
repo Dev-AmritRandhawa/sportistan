@@ -1,7 +1,4 @@
 import 'dart:convert';
-
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -25,7 +22,7 @@ class _GatewayState extends State<Gateway> {
                 color: Colors.green,
                 child: const Text("Generate"),
                 onPressed: () async {
-                  makeRequest();
+                  initiatePayment();
                 }),
           )
         ],
@@ -33,40 +30,49 @@ class _GatewayState extends State<Gateway> {
     );
   }
 
-  Future<void> makeRequest() async {
-    const url =
-        'https://us-central1-oursportistan.cloudfunctions.net/loginFunction'; // Replace with the actual URL of your Firebase Cloud Function
-    const customAmount = '1.00'; // Replace with your custom amount
+  Future<void> initiatePayment() async {
+    const String firebaseFunctionURL =
+        'https://generatetxnchecksum-6k2fyesg5q-uc.a.run.app/'; // Replace with your actual Firebase Cloud Function URL
+
     try {
-      final response = await http.get(Uri.parse('$url?amount=$customAmount'));
+      // Make a GET request to your Firebase Cloud Function to fetch the required parameters
+      final response = await http.get(Uri.parse(firebaseFunctionURL));
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        final orderID = responseData['paytmParams']['ORDERID'];
-        final signature = responseData['signature'];
-        final headers = {
-          'Content-Type': 'application/json',
+        final dynamic responseData = json.decode(response.body);
+        final String mid = responseData['mid'];
+        final String orderId = responseData['orderId'];
+        final String signature = responseData['signature'];
+
+        // Set up the paytmParams
+        final Map<String, dynamic> paytmParams = {
+          'body': {
+            'requestType': 'Payment',
+            'mid': mid,
+            'websiteName': 'DEFAULT',
+            'orderId': orderId,
+            'callbackUrl': 'https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderId',
+            'txnAmount': {'value': '1.00', 'currency': 'INR'},
+            'userInfo': {'custId': 'CUST_001'},
+          },
+          'head': {'signature': signature}, // Replace with your actual signature
         };
 
-        final data =
-            '{"body":{"requestType":"Payment","mid":"{SPORTS33075460479694}","websiteName":"{DEFAULT}","orderId":"$orderID","txnAmount":{"value":"1.00","currency":"INR"},"userInfo":{"custId":"Kjhjhgughhghghghghgh"},"callbackUrl":"https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderID"},"head":{"signature":"$signature"}}';
+        // Convert paytmParams to JSON string
+        final String postData = json.encode(paytmParams);
 
-        final url = Uri.parse(
-            'https://securegw.paytm.in/theia/api/v1/initiateTransaction?mid=SPORTS33075460479694&orderId=$orderID');
+        // Set up HTTP request options
+        final http.Response paytmResponse = await http.post(
+          Uri.parse(firebaseFunctionURL),
+          headers: {'Content-Type': 'application/json'},
+          body: postData,
+        );
 
-        final res = await http.post(url, headers: headers, body: data);
-
-        if (res.statusCode == 200) {
-          final responseData = json.decode(res.body);
-          print(responseData);
-        }
+        print('Paytm Response: ${paytmResponse.body}');
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("Failed")));
-        }
+        print('Failed to fetch parameters. Status code: ${response.statusCode}');
       }
-    } catch (e) {
-      return;
+    } catch (error) {
+      print('Error: $error');
     }
   }
 }
