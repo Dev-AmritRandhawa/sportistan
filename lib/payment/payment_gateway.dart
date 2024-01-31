@@ -89,7 +89,7 @@ class _GatewayState extends State<Gateway> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final txnToken = data['txnToken'];
+        final txnToken = data['body']["txnToken"];
         _startTransaction(
             txnToken: txnToken,
             orderID: widget.orderID,
@@ -115,12 +115,18 @@ class _GatewayState extends State<Gateway> {
       var response = AllInOneSdk.startTransaction('SPORTS33075460479694',
           orderID, amount, txnToken, callbackUrl, false, true, false);
       response.then((value) {
+
+        print("value");
         print(value);
+        print("response");
+        print(response);
 
       }).catchError((onError) {
         if (onError is PlatformException) {
+
           loading.value = false;
         } else {
+
           loading.value = false;
         }
       });

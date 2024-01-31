@@ -23,7 +23,7 @@ import 'package:sportistan/widgets/errors.dart';
 import 'package:sportistan/widgets/page_route.dart';
 
 class MapKey {
-  static String mapKey = 'AIzaSyCHJizjCjQBbAr1D6trmyKJPzOKyHGImZE';
+  static String mapKey = 'AIzaSyCfUlkT1fDn1FfayuIrh56f54n9NlwlS2c';
 }
 
 class MainPage extends StatefulWidget {

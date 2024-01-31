@@ -12,7 +12,6 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sportistan/authentication/set_location.dart';
-import 'package:sportistan/payment/payment_gateway.dart';
 import 'package:sportistan/widgets/errors.dart';
 import 'package:sportistan/widgets/local_notifications.dart';
 import 'package:sportistan/widgets/page_route.dart';
@@ -53,7 +52,7 @@ Future<void> registerFCM() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await FirebaseAppCheck.instance.activate(
       androidProvider: AndroidProvider.playIntegrity,
