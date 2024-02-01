@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 import 'package:paytm_allinonesdk/paytm_allinonesdk.dart';
 
 class Gateway extends StatefulWidget {
@@ -19,16 +20,29 @@ class Gateway extends StatefulWidget {
   State<Gateway> createState() => _GatewayState();
 }
 
-class _GatewayState extends State<Gateway> {
-  bool paymentInit = true;
-  ValueNotifier<bool> loading = ValueNotifier(true);
+class _GatewayState extends State<Gateway>  with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
   @override
   void initState() {
+    _controller = AnimationController(vsync: this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
     if (paymentInit) {
       initiatePaytmTransaction();
     }
-    super.initState();
+    super.dispose();
   }
+
+  bool paymentInit = true;
+  ValueNotifier<bool> loading = ValueNotifier(true);
+  String failedMsg = 'Processing' ;
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +60,23 @@ class _GatewayState extends State<Gateway> {
                   : Center(
                       child: Column(
                         children: [
-                          const Text(
-                            "Payment Failed",
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height / 4,
+                            width: MediaQuery.of(context).size.width / 2,
+                            child: Lottie.asset(
+                              'assets/loading.json',
+                              controller: _controller,
+                              onLoaded: (composition) {
+                                _controller
+                                  ..duration = composition.duration
+                                  ..repeat();
+                              },
+                            ),
+                          ),
+                           Text(
+                            failedMsg,
                             style:
-                                TextStyle(fontFamily: "DMSans", fontSize: 20),
+                                const TextStyle(fontFamily: "DMSans", fontSize: 20),
                           ),
                           CupertinoButton(
                               color: Colors.green,
@@ -90,7 +117,7 @@ class _GatewayState extends State<Gateway> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final txnToken = data['body']["txnToken"];
-        _startTransaction(
+       await _startTransaction(
             txnToken: txnToken,
             orderID: widget.orderID,
             amount: widget.amount,
@@ -104,6 +131,37 @@ class _GatewayState extends State<Gateway> {
     }
   }
 
+  Future<void> _statusTransaction()async {
+    try {
+      const String firebaseFunctionUrl =
+          'https://statusPaytmTransaction-6k2fyesg5q-uc.a.run.app';
+      final Map<String, dynamic> requestBody = {
+        "mid": 'SPORTS33075460479694',
+        "orderId": widget.orderID
+            .toString(),
+      };
+
+      final http.Response response = await http.post(
+        Uri.parse(firebaseFunctionUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+        final data = jsonDecode(response.body);
+        if(data['body']['resultInfo']['resultStatus'] == 'TXN_SUCCESS'&&data['body']['resultInfo']['resultCode'] == '01'){
+        if(mounted){
+
+          Navigator.pop(context,true);
+        }
+
+        }else{
+         failedMsg = data['body']['resultInfo']['resultMsg'];
+          loading.value = false;
+        }
+
+    } catch (e) {
+      loading.value = false;
+    }
+}
   Future<void> _startTransaction({
     required String txnToken,
     required String orderID,
@@ -114,13 +172,12 @@ class _GatewayState extends State<Gateway> {
     try {
       var response = AllInOneSdk.startTransaction('SPORTS33075460479694',
           orderID, amount, txnToken, callbackUrl, false, true, false);
-      response.then((value) {
-
-        print("value");
-        print(value);
-        print("response");
-        print(response);
-
+      response.then((value) async {
+        if(value != null){
+          if(value['body']['resultInfo']["resultMsg"]=='Success'){
+          await _statusTransaction();
+          }
+        }
       }).catchError((onError) {
         if (onError is PlatformException) {
 

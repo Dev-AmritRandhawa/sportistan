@@ -96,18 +96,14 @@ class PaytmChecksum {
 		return PaytmChecksum.encrypt(hashString,key);
 	}
 }
-PaytmChecksum.iv = '@@@@&&&&####$$$$';
+    PaytmChecksum.iv = '@@@@&&&&####$$$$';
 
-exports.initiatePaytmTransaction = onRequest(async (req, res) => {
+    exports.initiatePaytmTransaction = onRequest(async (req, res) => {
     try {
-        // Assuming the request body contains the necessary parameters including amount
         const { amount } = req.body;
         const { userID } = req.body;
 
-        // Generate a unique order ID (you may want to implement your logic here)
-
-
-const orderId = `Order${Math.floor(Math.random() * 1000000)}`;
+    const orderId = `Order${Math.floor(Math.random() * 1000000)}`;
 
         var paytmParams = {
             body: {
@@ -151,18 +147,13 @@ const orderId = `Order${Math.floor(Math.random() * 1000000)}`;
             post_res.on('data', function (chunk) {
                 response += chunk;
             });
-
-
             post_res.on('end', function () {
-                console.log('Response: ', response);
                 res.status(200).send(response);
             });
         });
-
         post_req.write(post_data);
         post_req.end();
     } catch (error) {
-        console.error('Error:', error);
         res.status(500).send('Internal Server Error'+error);
     }
 });

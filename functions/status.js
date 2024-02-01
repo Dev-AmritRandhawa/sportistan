@@ -96,9 +96,9 @@ class PaytmChecksum {
 		return PaytmChecksum.encrypt(hashString,key);
 	}
 }
-PaytmChecksum.iv = '@@@@&&&&####$$$$';
+    PaytmChecksum.iv = '@@@@&&&&####$$$$';
 
-exports.statusPaytmTransaction = onRequest(async (req, res) => {
+    exports.statusPaytmTransaction = onRequest(async (req, res) => {
     try {
         // Assuming the request body contains the necessary parameters including amount
         const { mid } = req.body;
@@ -109,7 +109,6 @@ exports.statusPaytmTransaction = onRequest(async (req, res) => {
             body: {
                 "mid": mid,
                 "orderId": orderId,
-
             },
         };
 
@@ -122,13 +121,7 @@ exports.statusPaytmTransaction = onRequest(async (req, res) => {
         var post_data = JSON.stringify(paytmParams);
 
            var options = {
-
-               /* for Staging */
                hostname: 'securegw.paytm.in',
-
-               /* for Production */
-               // hostname: 'securegw.paytm.in',
-
                port: 443,
                path: '/v3/order/status',
                method: 'POST',
@@ -146,7 +139,6 @@ exports.statusPaytmTransaction = onRequest(async (req, res) => {
 
 
             post_res.on('end', function () {
-                console.log('Response: ', response);
                 res.status(200).send(response);
             });
         });
@@ -154,7 +146,6 @@ exports.statusPaytmTransaction = onRequest(async (req, res) => {
         post_req.write(post_data);
         post_req.end();
     } catch (error) {
-        console.error('Error:', error);
         res.status(500).send('Internal Server Error'+error);
     }
 });
