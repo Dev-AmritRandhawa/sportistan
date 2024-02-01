@@ -26,15 +26,16 @@ class _GatewayState extends State<Gateway>  with SingleTickerProviderStateMixin 
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
+    if (paymentInit) {
+      initiatePaytmTransaction();
+    }
     super.initState();
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    if (paymentInit) {
-      initiatePaytmTransaction();
-    }
+
     super.dispose();
   }
 
