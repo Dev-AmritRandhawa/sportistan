@@ -101,15 +101,13 @@ PaytmChecksum.iv = '@@@@&&&&####$$$$';
 exports.statusPaytmTransaction = onRequest(async (req, res) => {
     try {
         // Assuming the request body contains the necessary parameters including amount
-        const { amount } = req.body;
-        const { userID } = req.body;
+        const { mid } = req.body;
+        const { orderId } = req.body;
 
-        // Generate a unique order ID (you may want to implement your logic here)
-        const orderId = ORDERID_${Math.floor(Math.random() * 1000000)};
 
         var paytmParams = {
             body: {
-                "mid": "SPORTS33075460479694",
+                "mid": mid,
                 "orderId": orderId,
 
             },
@@ -146,9 +144,7 @@ exports.statusPaytmTransaction = onRequest(async (req, res) => {
                 response += chunk;
             });
 
-           value orderIdAndResponse = {
 
-           };
             post_res.on('end', function () {
                 console.log('Response: ', response);
                 res.status(200).send(response);

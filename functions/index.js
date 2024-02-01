@@ -105,7 +105,9 @@ exports.initiatePaytmTransaction = onRequest(async (req, res) => {
         const { userID } = req.body;
 
         // Generate a unique order ID (you may want to implement your logic here)
-        const orderId = ORDERID_${Math.floor(Math.random() * 1000000)};
+
+
+const orderId = `Order${Math.floor(Math.random() * 1000000)}`;
 
         var paytmParams = {
             body: {
@@ -131,7 +133,7 @@ exports.initiatePaytmTransaction = onRequest(async (req, res) => {
         };
 
         var post_data = JSON.stringify(paytmParams);
-        const url = /theia/api/v1/initiateTransaction?mid=SPORTS33075460479694&orderId=${orderId};
+        const url = `/theia/api/v1/initiateTransaction?mid=SPORTS33075460479694&orderId=${orderId}`;
 
         var options = {
             hostname: 'securegw.paytm.in',
@@ -150,9 +152,7 @@ exports.initiatePaytmTransaction = onRequest(async (req, res) => {
                 response += chunk;
             });
 
-           value orderIdAndResponse = {
 
-           };
             post_res.on('end', function () {
                 console.log('Response: ', response);
                 res.status(200).send(response);
