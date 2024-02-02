@@ -13,7 +13,7 @@
         android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Sportistan"
+        android:label="Sportistan Pro"
         android:requestLegacyExternalStorage="true"
         android:resizeableActivity="true">
         <activity
@@ -52,7 +52,7 @@
             android:value="false" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCHJizjCjQBbAr1D6trmyKJPzOKyHGImZE" />
+            android:value="AIzaSyAE3ig_thIoD9vV_HP6KD9HG8dgU_epnII" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher" />

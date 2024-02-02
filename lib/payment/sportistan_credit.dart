@@ -10,7 +10,6 @@ import 'package:sportistan/booking/unique.dart';
 import 'package:sportistan/payment/payment_gateway.dart';
 import 'package:sportistan/widgets/page_route.dart';
 
-
 class SportistanCredit extends StatefulWidget {
   const SportistanCredit({super.key, required this.groundID});
   final String groundID;
@@ -52,14 +51,14 @@ class _SportistanCreditState extends State<SportistanCredit>
           .where("userID", isEqualTo: _auth.currentUser!.uid)
           .get()
           .then((value) => {
-        if (value.docChanges.isNotEmpty)
-          {
-            balance =
-                value.docChanges.first.doc.get('sportistanCredit'),
-            addBalanceController.text = '1000',
-            loading.value = false
-          }
-      });
+                if (value.docChanges.isNotEmpty)
+                  {
+                    balance =
+                        value.docChanges.first.doc.get('sportistanCredit'),
+                    addBalanceController.text = '1000',
+                    loading.value = false
+                  }
+              });
     } on SocketException {
       loading.value = false;
 
@@ -70,6 +69,7 @@ class _SportistanCreditState extends State<SportistanCredit>
       return;
     }
   }
+
   final _focusNode = FocusNode();
 
   KeyboardActionsConfig _buildConfig(BuildContext context) {
@@ -82,12 +82,15 @@ class _SportistanCreditState extends State<SportistanCredit>
           focusNode: _focusNode,
         ),
         KeyboardActionsItem(focusNode: _focusNode, toolbarButtons: [
-              (node) {
+          (node) {
             return TextButton(
                 onPressed: () {
                   node.unfocus();
                 },
-                child: const Text('Done',style: TextStyle(fontSize: 18),));
+                child: const Text(
+                  'Done',
+                  style: TextStyle(fontSize: 18),
+                ));
           }
         ])
       ],
@@ -105,153 +108,166 @@ class _SportistanCreditState extends State<SportistanCredit>
         elevation: 0,
       ),
       body: KeyboardActions(
-
         config: _buildConfig(context),
         child: SafeArea(
-          child:
-          Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-            ValueListenableBuilder(
-                valueListenable: loading,
-                builder: (context, value, child) => value
-                    ? const Card(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.all(7.0),
-                        child: CircularProgressIndicator(
-                          color: Colors.black45,
-                          strokeWidth: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-                    : Center(
-                  child: Column(
-                    children: [
-                      Image.asset('assets/logo.png',
-                          height: MediaQuery.of(context).size.height / 15),
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Sportistan',
-                          style: TextStyle(
-                              fontFamily: "DMSans",
-                              fontSize: 20,
-                              color: Colors.black54),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'Your Balance',
-                          style: TextStyle(
-                              fontFamily: "DMSans",
-                              fontSize:
-                              MediaQuery.of(context).size.height / 20,
-                              color: Colors.black54),
-                        ),
-                      ),
-                      Text(
-                        "Rs.$balance",
-                        style: TextStyle(
-                            fontFamily: "DMSans",
-                            fontSize:
-                            MediaQuery.of(context).size.height / 20,
-                            fontWeight: FontWeight.w500,
-                            color: balance < 10
-                                ? Colors.redAccent
-                                : Colors.green),
-                      ),
-                      Form(
-                          key: addBalanceControllerKey,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width / 1.5,
-                            child: TextFormField(
-
-                              cursorColor: Colors.black54,
-                              controller: addBalanceController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ValueListenableBuilder(
+                    valueListenable: loading,
+                    builder: (context, value, child) => value
+                        ? const Card(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(7.0),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.black45,
+                                    strokeWidth: 1,
+                                  ),
+                                ),
                               ],
-                              focusNode: _focusNode,
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (num.parse(value.toString()) > 50000 ||
-                                    num.parse(value.toString()) <= 0) {
-                                  return 'Min Rs.1 to Max Rs.50000';
-                                } else {
-                                  return null;
-                                }
-                              },
-                              decoration: const InputDecoration(
-                                  prefixIcon: Icon(Icons.add),
-                                  border: OutlineInputBorder(),
-                                  filled: true,
-                                  fillColor: Colors.white),
                             ),
-                          ))
-                    ],
+                          )
+                        : Center(
+                            child: Column(
+                              children: [
+                                Image.asset('assets/logo.png',
+                                    height: MediaQuery.of(context).size.height /
+                                        15),
+                                const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'Sportistan',
+                                    style: TextStyle(
+                                        fontFamily: "DMSans",
+                                        fontSize: 20,
+                                        color: Colors.black54),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'Your Balance',
+                                    style: TextStyle(
+                                        fontFamily: "DMSans",
+                                        fontSize:
+                                            MediaQuery.of(context).size.height /
+                                                20,
+                                        color: Colors.black54),
+                                  ),
+                                ),
+                                Text(
+                                  "Rs.$balance",
+                                  style: TextStyle(
+                                      fontFamily: "DMSans",
+                                      fontSize:
+                                          MediaQuery.of(context).size.height /
+                                              20,
+                                      fontWeight: FontWeight.w500,
+                                      color: balance < 10
+                                          ? Colors.redAccent
+                                          : Colors.green),
+                                ),
+                                Form(
+                                    key: addBalanceControllerKey,
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width /
+                                          1.5,
+                                      child: TextFormField(
+                                        cursorColor: Colors.black54,
+                                        controller: addBalanceController,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.digitsOnly
+                                        ],
+                                        focusNode: _focusNode,
+                                        keyboardType: TextInputType.number,
+                                        validator: (value) {
+                                          if (num.parse(value.toString()) >
+                                                  50000 ||
+                                              num.parse(value.toString()) <=
+                                                  0) {
+                                            return 'Min Rs.1 to Max Rs.50000';
+                                          } else {
+                                            return null;
+                                          }
+                                        },
+                                        decoration: const InputDecoration(
+                                            prefixIcon: Icon(Icons.add),
+                                            border: OutlineInputBorder(),
+                                            filled: true,
+                                            fillColor: Colors.white),
+                                      ),
+                                    ))
+                              ],
+                            ),
+                          )),
+                ValueListenableBuilder(
+                    valueListenable: showError,
+                    builder: (context, value, child) => value
+                        ? Column(
+                            children: [
+                              const Text(
+                                'Something went wrong',
+                                style: TextStyle(
+                                    color: Colors.red,
+                                    fontFamily: "DMSans",
+                                    fontSize: 220),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: MaterialButton(
+                                  onPressed: () {
+                                    loading.value = true;
+                                    _checkBalance();
+                                  },
+                                  color: Colors.red,
+                                  child: const Text('Try Again'),
+                                ),
+                              )
+                            ],
+                          )
+                        : Container()),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height / 5,
+                  child: Lottie.asset(
+                    'assets/walletAdding.json',
+                    controller: _controller,
+                    onLoaded: (composition) {
+                      _controller
+                        ..duration = composition.duration
+                        ..forward();
+                    },
                   ),
-                )),
-            ValueListenableBuilder(
-                valueListenable: showError,
-                builder: (context, value, child) => value
-                    ? Column(
-                  children: [
-                    const Text(
-                      'Something went wrong',
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontFamily: "DMSans",
-                          fontSize: 220),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: MaterialButton(
-                        onPressed: () {
-                          loading.value = true;
-                          _checkBalance();
-                        },
-                        color: Colors.red,
-                        child: const Text('Try Again'),
-                      ),
-                    )
-                  ],
+                ),
+                CupertinoButton(
+                    color: Colors.green.shade900,
+                    onPressed: () {
+                      if (addBalanceControllerKey.currentState!.validate()) {
+                        PageRouter.push(
+                            context,
+                            Gateway(
+                              amount:
+                                  addBalanceController.value.text.toString(),
+                              orderID: UniqueID.generateRandomString(),
+                              userID: FirebaseAuth.instance.currentUser!.uid
+                                  .toString(),
+                            ));
+                      }
+                    },
+                    child: const Text('Add Credits')),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Your Payment is 100% Secure",
+                    style: TextStyle(
+                        fontFamily: "DMSans",
+                        fontSize: 20,
+                        color: Colors.black54),
+                  ),
                 )
-                    : Container()),
-            SizedBox(
-              height: MediaQuery.of(context).size.height / 5,
-              child: Lottie.asset(
-                'assets/walletAdding.json',
-                controller: _controller,
-                onLoaded: (composition) {
-                  _controller
-                    ..duration = composition.duration
-                    ..forward();
-                },
-              ),
-            ),
-            CupertinoButton(
-                color: Colors.green.shade900,
-                onPressed: () {
-                  if (addBalanceControllerKey.currentState!.validate()) {
-                    PageRouter.push(
-                        context,
-                         Gateway(amount: addBalanceController.value.text.toString(), orderID: UniqueID.generateRandomString(), userID: FirebaseAuth.instance.currentUser!.uid.toString(),));
-                  }
-                },
-                child: const Text('Add Credits')),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                "Your Payment is 100% Secure",
-                style: TextStyle(
-                    fontFamily: "DMSans", fontSize: 20, color: Colors.black54),
-              ),
-            )
-          ]),
+              ]),
         ),
       ),
     );

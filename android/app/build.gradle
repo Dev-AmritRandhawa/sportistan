@@ -80,9 +80,9 @@ android {
 
         signingConfigs {
             release {
-                storeFile file("/Users/indianrenters/StudioProjects/sportistan/android/app/upload.jks")
+                storeFile file("C:/Users/amrit/StudioProjects/sportistan/android/app/upload.keystore")
                 storePassword "android"
-                keyAlias "androiddebugkey"
+                keyAlias "androidKey"
                 keyPassword "android"
             }
         }
@@ -101,6 +101,5 @@ android {
     dependencies {
         implementation 'com.google.android.recaptcha:recaptcha:18.4.0'
         implementation "com.squareup.okhttp3:okhttp:4.8.0"
-
     }
 }
