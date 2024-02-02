@@ -11,13 +11,13 @@ import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
-import 'package:sportistan/booking/booking_info.dart';
-import 'package:sportistan/booking/send_cloud_message.dart';
-import 'package:sportistan/booking/unique.dart';
-import 'package:sportistan/nav/nav_profile.dart';
-import 'package:sportistan/payment/payment_gateway.dart';
-import 'package:sportistan/widgets/errors.dart';
-import 'package:sportistan/widgets/page_route.dart';
+import 'package:SportistanPro/booking/booking_info.dart';
+import 'package:SportistanPro/booking/send_cloud_message.dart';
+import 'package:SportistanPro/booking/unique.dart';
+import 'package:SportistanPro/nav/nav_profile.dart';
+import 'package:SportistanPro/payment/payment_gateway.dart';
+import 'package:SportistanPro/widgets/errors.dart';
+import 'package:SportistanPro/widgets/page_route.dart';
 
 class BookASlot extends StatefulWidget {
   final String group;
@@ -1517,7 +1517,7 @@ class _BookASlotState extends State<BookASlot> {
                               final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>  Gateway(amount: serverCommissionCharge.toString(), orderID: UniqueID.generateRandomString(), userID: FirebaseAuth.instance.currentUser!.uid,
+                                    builder: (context) => Gateway(amount: serverCommissionCharge,addInWallet: false,
                                     ),
                                   ));
 
@@ -1574,7 +1574,7 @@ class _BookASlotState extends State<BookASlot> {
                               final result = await Navigator.push(
                                   context,
                                   CupertinoPageRoute(
-                                    builder: (context) =>  Gateway(amount: serverCommissionCharge.toString(), orderID: UniqueID.generateRandomString(), userID: FirebaseAuth.instance.currentUser!.uid,
+                                    builder: (context) =>  Gateway(amount: serverCommissionCharge,addInWallet: false,
                                     ))
 
                               );

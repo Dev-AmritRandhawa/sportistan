@@ -7,8 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sportistan/booking/booking_entire_day_info.dart';
-import 'package:sportistan/booking/booking_info.dart';
+import 'package:SportistanPro/booking/booking_entire_day_info.dart';
+import 'package:SportistanPro/booking/booking_info.dart';
 
 class NavHistory extends StatefulWidget {
   const NavHistory({super.key});

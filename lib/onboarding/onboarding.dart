@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sportistan/authentication/authentication.dart';
-import 'package:sportistan/widgets/page_route.dart';
+import 'package:SportistanPro/authentication/authentication.dart';
+import 'package:SportistanPro/widgets/page_route.dart';
 
 class OnBoard extends StatefulWidget {
   const OnBoard({super.key});

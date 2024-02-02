@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:sportistan/nav/main_page.dart';
-import 'package:sportistan/nav/nav_profile.dart';
+import 'package:SportistanPro/nav/main_page.dart';
+import 'package:SportistanPro/nav/nav_profile.dart';
 
 import 'nav_history.dart';
 

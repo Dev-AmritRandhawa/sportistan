@@ -10,12 +10,12 @@ import 'package:intl/intl.dart';
 import 'package:pinput/pinput.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
-import 'package:sportistan/authentication/authentication.dart';
-import 'package:sportistan/nav/crop.dart';
-import 'package:sportistan/nav/nav_history.dart';
-import 'package:sportistan/payment/sportistan_credit.dart';
-import 'package:sportistan/widgets/errors.dart';
-import 'package:sportistan/widgets/page_route.dart';
+import 'package:SportistanPro/authentication/authentication.dart';
+import 'package:SportistanPro/nav/crop.dart';
+import 'package:SportistanPro/nav/nav_history.dart';
+import 'package:SportistanPro/payment/sportistan_credit.dart';
+import 'package:SportistanPro/widgets/errors.dart';
+import 'package:SportistanPro/widgets/page_route.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NavProfile extends StatefulWidget {

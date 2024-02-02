@@ -1,4 +1,9 @@
 import 'dart:io';
+import 'package:SportistanPro/authentication/set_location.dart';
+import 'package:SportistanPro/main.dart';
+import 'package:SportistanPro/nav/nav_home.dart';
+import 'package:SportistanPro/widgets/errors.dart';
+import 'package:SportistanPro/widgets/page_route.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_code_picker/country_code_picker.dart';
@@ -11,11 +16,7 @@ import 'package:otp_timer_button/otp_timer_button.dart';
 import 'package:pinput/pinput.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
-import 'package:sportistan/authentication/set_location.dart';
-import 'package:sportistan/main.dart';
-import 'package:sportistan/nav/nav_home.dart';
-import 'package:sportistan/widgets/errors.dart';
-import 'package:sportistan/widgets/page_route.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 class PhoneAuthentication extends StatefulWidget {

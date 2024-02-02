@@ -98,12 +98,13 @@ class PaytmChecksum {
 }
     PaytmChecksum.iv = '@@@@&&&&####$$$$';
 
-    exports.initiatePaytmTransaction = onRequest(async (req, res) => {
+    exports.initiatePaytmTransactionToken = onRequest(async (req, res) => {
     try {
         const { amount } = req.body;
         const { userID } = req.body;
+        const { orderId } = req.body;
 
-    const orderId = `Order${Math.floor(Math.random() * 1000000)}`;
+
 
         var paytmParams = {
             body: {

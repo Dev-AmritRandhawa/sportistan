@@ -15,12 +15,12 @@ import 'package:maps_launcher/maps_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
-import 'package:sportistan/authentication/set_location.dart';
-import 'package:sportistan/booking/show_slots.dart';
-import 'package:sportistan/nav/edit_your_sports.dart';
-import 'package:sportistan/nav/search_grounds_by_algolia.dart';
-import 'package:sportistan/widgets/errors.dart';
-import 'package:sportistan/widgets/page_route.dart';
+import 'package:SportistanPro/authentication/set_location.dart';
+import 'package:SportistanPro/booking/show_slots.dart';
+import 'package:SportistanPro/nav/edit_your_sports.dart';
+import 'package:SportistanPro/nav/search_grounds_by_algolia.dart';
+import 'package:SportistanPro/widgets/errors.dart';
+import 'package:SportistanPro/widgets/page_route.dart';
 
 class MapKey {
   static String mapKey = 'AIzaSyAE3ig_thIoD9vV_HP6KD9HG8dgU_epnII';

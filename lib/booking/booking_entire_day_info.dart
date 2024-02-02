@@ -10,10 +10,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
-import 'package:sportistan/booking/send_cloud_message.dart';
-import 'package:sportistan/nav/nav_home.dart';
-import 'package:sportistan/widgets/errors.dart';
-import 'package:sportistan/widgets/page_route.dart';
+import 'package:SportistanPro/booking/send_cloud_message.dart';
+import 'package:SportistanPro/nav/nav_home.dart';
+import 'package:SportistanPro/widgets/errors.dart';
+import 'package:SportistanPro/widgets/page_route.dart';
 
 
 class BookingEntireDayInfo extends StatefulWidget {

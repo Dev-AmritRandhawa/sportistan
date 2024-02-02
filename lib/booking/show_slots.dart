@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sportistan/booking/book_entire_day.dart';
-import 'package:sportistan/nav/nav_home.dart';
-import 'package:sportistan/widgets/page_route.dart';
+import 'package:SportistanPro/booking/book_entire_day.dart';
+import 'package:SportistanPro/nav/nav_home.dart';
+import 'package:SportistanPro/widgets/page_route.dart';
 import 'book_a_slot.dart';
 
 class ShowSlots extends StatefulWidget {

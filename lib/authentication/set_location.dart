@@ -7,9 +7,9 @@ import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
-import 'package:sportistan/nav/main_page.dart';
-import 'package:sportistan/nav/nav_home.dart';
-import 'package:sportistan/widgets/page_route.dart';
+import 'package:SportistanPro/nav/main_page.dart';
+import 'package:SportistanPro/nav/nav_home.dart';
+import 'package:SportistanPro/widgets/page_route.dart';
 
 class SetLocation extends StatefulWidget {
   const SetLocation({super.key});

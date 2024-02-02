@@ -12,8 +12,8 @@ import 'package:maps_launcher/maps_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
-import 'package:sportistan/booking/show_slots.dart';
-import 'package:sportistan/widgets/page_route.dart';
+import 'package:SportistanPro/booking/show_slots.dart';
+import 'package:SportistanPro/widgets/page_route.dart';
 import 'package:http/http.dart' as http;
 
 class Home extends StatefulWidget {

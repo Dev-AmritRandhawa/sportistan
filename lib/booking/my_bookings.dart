@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
-import 'package:sportistan/booking/booking_info.dart';
-import 'package:sportistan/widgets/page_route.dart';
+import 'package:SportistanPro/booking/booking_info.dart';
+import 'package:SportistanPro/widgets/page_route.dart';
 
 class Bookings extends StatefulWidget {
   const Bookings({super.key});
