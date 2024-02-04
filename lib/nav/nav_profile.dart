@@ -12,7 +12,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:SportistanPro/authentication/authentication.dart';
 import 'package:SportistanPro/nav/crop.dart';
-import 'package:SportistanPro/nav/nav_history.dart';
 import 'package:SportistanPro/payment/sportistan_credit.dart';
 import 'package:SportistanPro/widgets/errors.dart';
 import 'package:SportistanPro/widgets/page_route.dart';
@@ -321,58 +320,8 @@ class _NavProfileState extends State<NavProfile> {
                                             fontSize: 22),
                                         softWrap: true),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const Text('Turn Off Notifications',
-                                            style: TextStyle(
-                                                fontFamily: "DMSans",
-                                                color: Colors.black54,
-                                                fontSize: 20)),
-                                        ValueListenableBuilder(
-                                          valueListenable:
-                                              notificationListenable,
-                                          builder: (context, value, child) {
-                                            return CupertinoSwitch(
-                                              value: value,
-                                              onChanged: (v) {
-                                                notificationListenable.value =
-                                                    v;
-                                              },
-                                            );
-                                          },
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  Card(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: InkWell(
-                                        onTap: () {
-                                          PageRouter.push(
-                                              context, const NavHistory());
-                                        },
-                                        child: const Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text('My Bookings',
-                                                style: TextStyle(
-                                                    fontFamily: "DMSans",
-                                                    color: Colors.black54,
-                                                    fontSize: 20)),
-                                            Icon(
-                                              Icons.history,
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+
+
                                   const Padding(
                                     padding: EdgeInsets.all(8.0),
                                     child: Row(

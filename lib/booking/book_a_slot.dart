@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:SportistanPro/booking/payment_mode.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,9 +16,10 @@ import 'package:SportistanPro/booking/booking_info.dart';
 import 'package:SportistanPro/booking/send_cloud_message.dart';
 import 'package:SportistanPro/booking/unique.dart';
 import 'package:SportistanPro/nav/nav_profile.dart';
-import 'package:SportistanPro/payment/payment_gateway.dart';
 import 'package:SportistanPro/widgets/errors.dart';
 import 'package:SportistanPro/widgets/page_route.dart';
+
+import '../payment/payment_gateway.dart';
 
 class BookASlot extends StatefulWidget {
   final String group;
@@ -110,7 +112,6 @@ class _BookASlotState extends State<BookASlot> {
 
   late num finalDeduction;
 
-  late num calculateDeduction;
   late num newAmount;
 
   Future<void> serverInit() async {
@@ -323,7 +324,6 @@ class _BookASlotState extends State<BookASlot> {
                                                   .width /
                                               1.2,
                                           child: TextFormField(
-
                                             validator: (value) {
                                               if (value!.isEmpty) {
                                                 return "Name required.";
@@ -335,14 +335,12 @@ class _BookASlotState extends State<BookASlot> {
                                             },
                                             controller: nameControllerA,
                                             onChanged: (data) {
-                                              nameKeyA.currentState!
-                                                  .validate();
+                                              nameKeyA.currentState!.validate();
                                             },
                                             keyboardType: TextInputType.name,
                                             enabled: !value,
                                             obscureText: hideData.value,
                                             decoration: const InputDecoration(
-
                                                 fillColor: Colors.white,
                                                 labelText: "Contact Person*",
                                                 border: InputBorder.none,
@@ -384,12 +382,11 @@ class _BookASlotState extends State<BookASlot> {
                                             },
                                             keyboardType: TextInputType.phone,
                                             inputFormatters: [
-                                              FilteringTextInputFormatter
-                                                  .allow(RegExp('[0-9]')),
+                                              FilteringTextInputFormatter.allow(
+                                                  RegExp('[0-9]')),
                                             ],
                                             autofillHints: const [
-                                              AutofillHints
-                                                  .telephoneNumberLocal
+                                              AutofillHints.telephoneNumberLocal
                                             ],
                                             decoration: InputDecoration(
                                                 fillColor: Colors.white,
@@ -407,9 +404,7 @@ class _BookASlotState extends State<BookASlot> {
                                                 suffixIcon: IconButton(
                                                     onPressed: () async {
                                                       if (numberControllerA
-                                                          .value
-                                                          .text
-                                                          .isEmpty) {
+                                                          .value.text.isEmpty) {
                                                         ScaffoldMessenger.of(
                                                                 context)
                                                             .showSnackBar(
@@ -925,30 +920,26 @@ class _BookASlotState extends State<BookASlot> {
       String uniqueID = UniqueID.generateRandomString();
       try {
         await _server.collection("GroundBookings").add({
-          'slotTime': widget.slotTime.toString(),
-          'nonFormattedTime': widget.nonFormattedTime.toString(),
-          'bookingPerson': data.first.doc.get('name'),
+          'slotTime': widget.slotTime,
+          'bookingPerson': 'Ground Owner',
           'groundName': widget.groundName,
           'bookingCreated': DateTime.parse(widget.date),
           'bookedAt': DateTime.now(),
-          'groundType': widget.groundType,
-          'shouldCountInBalance': false,
-          'isBookingCancelled': false,
-          'entireDayBooking': false,
           'userID': _auth.currentUser!.uid,
+          'groundType': widget.groundType,
+          'group': widget.group,
+          'isBookingCancelled': false,
+          'shouldCountInBalance': false,
+          'entireDayBooking': false,
+          'nonFormattedTime': widget.nonFormattedTime,
           'bookingCommissionCharged': serverCommissionCharge,
+          'entireDayBookingID': [],
           'feesDue': calculateFeesDue(),
+          'paymentMode': PaymentMode.type,
           'ratingGiven': false,
           'rating': 3.0,
-          'ratingTags': [],
-          'teamASkill': teamALevelTag.toInt(),
-          'teamBSkill': showTeamB.value ? teamBLevelTag.toInt() : 1,
+          'bothTeamBooked': checkBoxTeamB.value,
           'groundID': widget.groundID,
-          'TeamA': alreadyCommissionCharged
-              ? commissionCharged
-              : serverCommissionCharge,
-          'TeamB':
-              checkBoxTeamB.value ? serverCommissionCharge : 'NotApplicable',
           "teamA": {
             'teamName': teamControllerA.value.text,
             'personName': nameControllerA.value.text,
@@ -959,20 +950,18 @@ class _BookASlotState extends State<BookASlot> {
           },
           "teamB": {
             'teamName': checkBoxTeamB.value ? teamControllerB.value.text : '',
-            'personName': checkBoxTeamB.value ? nameControllerB.value.text : '',
+            'personName':
+            checkBoxTeamB.value ? nameControllerB.value.text : '',
             'phoneNumber':
-                checkBoxTeamB.value ? numberControllerB.value.text : '',
+            checkBoxTeamB.value ? numberControllerB.value.text : '',
             "notesTeamB": notesTeamB.value.text.isNotEmpty
                 ? notesTeamB.value.text.toString()
                 : "",
           },
-          'slotPrice': checkBoxTeamB.value
-              ? updatedPrice
-              : updatedPrice / 2.toInt().round(),
           'totalSlotPrice': updatedPrice,
-          'advancePayment': advancePaymentCalculate(),
+          'slotPrice': int.parse(priceController.value.text.toString()),
+          'advancePayment': serverCommissionCharge,
           'slotStatus': slotStatus(),
-          'bothTeamBooked': checkBoxTeamB.value,
           'slotID': widget.slotID,
           'bookingID': uniqueID,
           'date': widget.date,
@@ -1003,30 +992,23 @@ class _BookASlotState extends State<BookASlot> {
             .collection("GroundBookings")
             .doc(refDetails.docs.first.id)
             .update({
-          'slotTime': widget.slotTime.toString(),
-          'nonFormattedTime': widget.nonFormattedTime.toString(),
-          'bookingPerson': data.first.doc.get('name'),
+          'slotTime': widget.slotTime,
+          'bookingPerson': 'Ground Owner',
           'groundName': widget.groundName,
           'bookingCreated': DateTime.parse(widget.date),
           'bookedAt': DateTime.now(),
           'groundType': widget.groundType,
           'shouldCountInBalance': false,
           'isBookingCancelled': false,
+          'nonFormattedTime': widget.nonFormattedTime,
           'userID': _auth.currentUser!.uid,
-          'bookingCommissionCharged': serverCommissionCharge,
+          'bookingCommissionCharged': serverCommissionCharge ,
           'feesDue': calculateFeesDue(),
+          'paymentMode': PaymentMode.type,
           'ratingGiven': false,
-          'entireDayBooking': false,
           'rating': 3.0,
           'ratingTags': [],
           'groundID': widget.groundID,
-          'TeamA': alreadyCommissionCharged
-              ? commissionCharged
-              : serverCommissionCharge,
-          'TeamB':
-              checkBoxTeamB.value ? serverCommissionCharge : 'NotApplicable',
-          'teamASkill': teamALevelTag.toInt(),
-          'teamBSkill': showTeamB.value ? teamBLevelTag.toInt() : 1,
           "teamA": {
             'teamName': teamControllerA.value.text,
             'personName': nameControllerA.value.text,
@@ -1037,18 +1019,17 @@ class _BookASlotState extends State<BookASlot> {
           },
           "teamB": {
             'teamName': checkBoxTeamB.value ? teamControllerB.value.text : '',
-            'personName': checkBoxTeamB.value ? nameControllerB.value.text : '',
+            'personName':
+            checkBoxTeamB.value ? nameControllerB.value.text : '',
             'phoneNumber':
-                checkBoxTeamB.value ? numberControllerB.value.text : '',
+            checkBoxTeamB.value ? numberControllerB.value.text : '',
             "notesTeamB": notesTeamB.value.text.isNotEmpty
                 ? notesTeamB.value.text.toString()
                 : "",
           },
-          'slotPrice': checkBoxTeamB.value
-              ? updatedPrice
-              : updatedPrice / 2.toInt().round(),
+          'slotPrice': int.parse(priceController.value.text.toString()),
           'totalSlotPrice': updatedPrice,
-          'advancePayment': advancePaymentCalculate(),
+          'advancePayment': serverCommissionCharge,
           'slotStatus': slotStatus(),
           'bothTeamBooked': checkBoxTeamB.value,
           'slotID': widget.slotID,
@@ -1102,19 +1083,14 @@ class _BookASlotState extends State<BookASlot> {
     }
   }
 
-  num advancePaymentCalculate() {
-    if (alreadyCommissionCharged) {
-      return commissionCharged + serverCommissionCharge;
-    } else {
-      return updatedPrice / 2.toInt().round() - serverCommissionCharge;
-    }
-  }
+
 
   num calculateFeesDue() {
     if (checkBoxTeamB.value) {
-      return updatedPrice - serverCommissionCharge;
+      num newBalance = serverCommissionCharge + commissionCharged;
+      return num.parse(priceController.value.text.trim()) - newBalance;
     }
-    return updatedPrice / 2 - serverCommissionCharge;
+    return num.parse(priceController.value.text.trim()) - serverCommissionCharge;
   }
 
   panel() {
@@ -1218,7 +1194,8 @@ class _BookASlotState extends State<BookASlot> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              const Icon(Icons.privacy_tip_sharp,color: Colors.orange),
+                              const Icon(Icons.privacy_tip_sharp,
+                                  color: Colors.orange),
                               const Text('Your are logged in',
                                   style: TextStyle(
                                       fontFamily: "DMSans",
@@ -1513,115 +1490,123 @@ class _BookASlotState extends State<BookASlot> {
                             await createBooking();
                           } else {
                             if (Platform.isAndroid) {
-
                               final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => Gateway(amount: serverCommissionCharge,addInWallet: false,
+                                    builder: (context) => Gateway(
+                                      amount: serverCommissionCharge,
+                                      addInWallet: false,
                                     ),
                                   ));
 
-                              if (result) {
-                                if (mounted) {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    builder: (buildContextWaiting) {
-                                      return Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          const Text("Please Wait",
-                                              style: TextStyle(
-                                                  fontFamily: "DMSans",
-                                                  fontSize: 22)),
-                                          Image.asset('assets/logo.png',
-                                              height: MediaQuery.of(context)
-                                                      .size
-                                                      .height /
-                                                  8),
-                                          AnimatedTextKit(animatedTexts: [
-                                            TyperAnimatedText(
-                                                "We are confirming your booking..",
-                                                textStyle: const TextStyle(
+                              if (result != null) {
+                                if (result) {
+                                  if (mounted) {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      builder: (buildContextWaiting) {
+                                        return Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            const Text("Please Wait",
+                                                style: TextStyle(
+                                                    fontFamily: "DMSans",
                                                     fontSize: 22)),
-                                          ]),
-                                          const CircularProgressIndicator(
-                                              strokeWidth: 1,
-                                              color: Colors.green),
-                                          CupertinoButton(
-                                              onPressed: () {
-                                                Navigator.pop(
-                                                    buildContextWaiting);
-                                              },
-                                              child: const Text('Cancel'))
-                                        ],
-                                      );
-                                    },
-                                  );
-                                  createBooking();
+                                            Image.asset('assets/logo.png',
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height /
+                                                    8),
+                                            AnimatedTextKit(animatedTexts: [
+                                              TyperAnimatedText(
+                                                  "We are confirming your booking..",
+                                                  textStyle: const TextStyle(
+                                                      fontSize: 22)),
+                                            ]),
+                                            const CircularProgressIndicator(
+                                                strokeWidth: 1,
+                                                color: Colors.green),
+                                            CupertinoButton(
+                                                onPressed: () {
+                                                  Navigator.pop(
+                                                      buildContextWaiting);
+                                                },
+                                                child: const Text('Cancel'))
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    createBooking();
+                                  }
                                 }
                               } else {
                                 if (mounted) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(const SnackBar(
-                                    content: Text("Payment Failed",
-                                        style: TextStyle(color: Colors.white)),
-                                    backgroundColor: Colors.red,
-                                  ));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text("Payment Cancelled")));
                                 }
                               }
                             } else {
                               final result = await Navigator.push(
                                   context,
                                   CupertinoPageRoute(
-                                    builder: (context) =>  Gateway(amount: serverCommissionCharge,addInWallet: false,
-                                    ))
-
-                              );
-                              if (result) {
-                                if (mounted) {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    builder: (buildContextWaiting) {
-                                      return Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          const Text("Please Wait",
-                                              style: TextStyle(
-                                                  fontFamily: "DMSans",
-                                                  fontSize: 22)),
-                                          Image.asset('assets/logo.png',
-                                              height: MediaQuery.of(context)
-                                                      .size
-                                                      .height /
-                                                  8),
-                                          AnimatedTextKit(animatedTexts: [
-                                            TyperAnimatedText(
-                                                "We are confirming your booking..",
-                                                textStyle: const TextStyle(
+                                      builder: (context) => Gateway(
+                                            amount: serverCommissionCharge,
+                                            addInWallet: false,
+                                          )));
+                              if (result != null) {
+                                if (result) {
+                                  if (mounted) {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      builder: (buildContextWaiting) {
+                                        return Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            const Text("Please Wait",
+                                                style: TextStyle(
+                                                    fontFamily: "DMSans",
                                                     fontSize: 22)),
-                                          ]),
-                                          const CircularProgressIndicator(
-                                              strokeWidth: 1,
-                                              color: Colors.green),
-                                          CupertinoButton(
-                                              onPressed: () {
-                                                Navigator.pop(
-                                                    buildContextWaiting);
-                                              },
-                                              child: const Text('Cancel'))
-                                        ],
-                                      );
-                                    },
-                                  );
-                                  createBooking();
+                                            Image.asset('assets/logo.png',
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height /
+                                                    8),
+                                            AnimatedTextKit(animatedTexts: [
+                                              TyperAnimatedText(
+                                                  "We are confirming your booking..",
+                                                  textStyle: const TextStyle(
+                                                      fontSize: 22)),
+                                            ]),
+                                            const CircularProgressIndicator(
+                                                strokeWidth: 1,
+                                                color: Colors.green),
+                                            CupertinoButton(
+                                                onPressed: () {
+                                                  Navigator.pop(
+                                                      buildContextWaiting);
+                                                },
+                                                child: const Text('Cancel'))
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    createBooking();
+                                  }
+                                } else {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text("Payment Failed")));
+                                  }
                                 }
                               } else {
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                          content: Text("Payment Failed")));
+                                          content: Text("Payment Cancelled")));
                                 }
                               }
                             }

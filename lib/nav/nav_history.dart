@@ -432,7 +432,7 @@ class _NavHistoryState extends State<NavHistory> {
                                                               .allSlotsRef
                                                               .length,
                                                       itemBuilder:
-                                                          (context, count) {
+                                                          (context, counter) {
                                                         return Padding(
                                                           padding:
                                                               const EdgeInsets
@@ -442,7 +442,7 @@ class _NavHistoryState extends State<NavHistory> {
                                                               child: Text(bookingData[
                                                                       index]
                                                                   .allSlotsRef[
-                                                                      count]
+                                                              counter]
                                                                   .toString())),
                                                         );
                                                       },

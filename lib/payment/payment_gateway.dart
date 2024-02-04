@@ -28,9 +28,7 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
-    if (paymentInit) {
-      initiatePaytmTransaction();
-    }
+
     super.initState();
   }
 
@@ -55,69 +53,89 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+
           ValueListenableBuilder(
               valueListenable: loading,
               builder: (context, value, child) => value
                   ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height / 4,
-                      width: MediaQuery.of(context).size.width / 2,
-                      child: Lottie.asset(
-                        'assets/walletAdding.json',
-                        controller: _controller,
-                        onLoaded: (composition) {
-                          _controller
-                            ..duration = composition.duration
-                            ..repeat();
-                        },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height / 4,
+                            width: MediaQuery.of(context).size.width / 2,
+                            child: Lottie.asset(
+                              'assets/wallet.json',
+                              controller: _controller,
+                              onLoaded: (composition) {
+                                _controller
+                                  ..duration = composition.duration
+                                  ..forward().then((value) => {
+                                      initiatePaytmTransaction()
+                                  });
+                              },
+                            ),
+                          ),
+                          const CircularProgressIndicator(strokeWidth: 1,),
+                          const Text(
+                            "Processing Payment",
+                            style:
+                                TextStyle(fontFamily: "DMSans", fontSize: 20),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              "Please don't close page we will auto verify payment",
+                              style:
+                                  TextStyle(fontFamily: "DMSans", fontSize: 16,color: Colors.black45),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CupertinoButton(
+                                color: Colors.green,
+                                child: const Text("Cancel"),
+                                onPressed: () async {
+                                 Navigator.pop(context);
+                                }),
+                          ),
+                        ],
                       ),
-                    ),
-                    const Text(
-                      "Processing",
-                      style:
-                      TextStyle(fontFamily: "DMSans", fontSize: 20),
-                    ),
-                  ],
-                ),
-              )
+                    )
                   : Center(
-                child: Column(
-
-                  children: [const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                  textAlign: TextAlign.center,
-                      "Your Transaction is failed if any amount is deducted please contact customer support",
-                      style:
-                      TextStyle(fontFamily: "DMSans", fontSize: 20),
-                    ),
-                  ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height / 3,
-                      child: Lottie.asset(
-                        'assets/paymentError.json',
-                        controller: _controller,
-                        onLoaded: (composition) {
-                          _controller
-                            ..duration = composition.duration
-                            ..repeat();
-                        },
+                      child: Column(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              "Your Transaction is failed if any amount is deducted please contact customer support",
+                              style:
+                                  TextStyle(fontFamily: "DMSans", fontSize: 20),
+                            ),
+                          ),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height / 3,
+                            child: Lottie.asset(
+                              'assets/paymentError.json',
+                              controller: _controller,
+                              onLoaded: (composition) {
+                                _controller
+                                  ..duration = composition.duration
+                                  ..repeat();
+                              },
+                            ),
+                          ),
+                          CupertinoButton(
+                              color: Colors.green,
+                              child: const Text("Try Again"),
+                              onPressed: () async {
+                                loading.value = true;
+                                initiatePaytmTransaction();
+                              }),
+                        ],
                       ),
-                    ),
-
-                    CupertinoButton(
-                        color: Colors.green,
-                        child: const Text("Try Again"),
-                        onPressed: () async {
-                          loading.value = true;
-                          initiatePaytmTransaction();
-                        }),
-                  ],
-                ),
-              ))
+                    ))
         ],
       ),
     );
@@ -129,7 +147,7 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
 
     try {
       const String firebaseFunctionUrl =
-          'https://initiatepaytmtransactiontoken-5se5wkofya-uc.a.run.app';
+          'https://initiatepaytmtransaction-kyawqf5yqa-uc.a.run.app';
 
       final Map<String, dynamic> requestBody = {
         "amount": widget.amount,
@@ -176,7 +194,7 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
   Future<void> _statusTransaction({required String orderID}) async {
     try {
       const String firebaseFunctionUrl =
-          'https://statuspaytmtransaction-5se5wkofya-uc.a.run.app';
+          'https://statuspaytmtransaction-kyawqf5yqa-uc.a.run.app';
       final Map<String, dynamic> requestBody = {
         "mid": 'SPORTS33075460479694',
         "orderId": orderID,
@@ -190,14 +208,13 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
       final data = jsonDecode(response.body);
       if (data['body']['resultInfo']['resultStatus'] == 'TXN_SUCCESS' &&
           data['body']['resultInfo']['resultCode'] == '01') {
-
-          if (widget.addInWallet) {
-            await _checkBalance();
-          } else {
-            if(mounted){
+        if (widget.addInWallet) {
+          await _checkBalance();
+        } else {
+          if (mounted) {
             Navigator.pop(context, true);
-        }
           }
+        }
       } else {
         failedMsg = data['body']['resultInfo']['resultMsg'];
         loading.value = false;
@@ -208,79 +225,80 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _checkBalance() async {
-      await FirebaseFirestore.instance
-          .collection("SportistanUsers")
-          .where("userID", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-          .get()
-          .then((value) => {
-        if (value.docChanges.isNotEmpty)
-          {
-            updateBalance(
-                current:
-                value.docChanges.first.doc.get('sportistanCredit'),
-                id: value.docChanges.first.doc.id)
-          }
-      });
-
+    await FirebaseFirestore.instance
+        .collection("SportistanUsers")
+        .where("userID", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .get()
+        .then((value) => {
+              if (value.docChanges.isNotEmpty)
+                {
+                  updateBalance(
+                      current:
+                          value.docChanges.first.doc.get('sportistanCredit'),
+                      id: value.docChanges.first.doc.id)
+                }
+            });
   }
 
   Future<void> updateBalance({required num current, required String id}) async {
-
-    await  FirebaseFirestore.instance
-          .collection("SportistanUsers")
-          .doc(id)
-          .update({'sportistanCredit': widget.amount + current}).then((value) => {
-
-        showModalBottomSheet(
-          isDismissible: false,
-          isScrollControlled: false,enableDrag: false,
-          showDragHandle: true,
-          context: context,
-          builder: (ctx) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                const Text(
-                  "Success",
-                  style: TextStyle(
-                      fontFamily: 'DMSans',
-                      fontSize: 22,
-                      color: Colors.green),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "Transaction is Completed. Amount Rs.${widget.amount} added successfully in your wallet",
-                    style: const TextStyle(
-                        fontFamily: 'DMSans',
-                  fontSize: 20,
-                        color: Colors.black54),
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 4,
-                  width: MediaQuery.of(context).size.width / 2,
-                  child: Lottie.asset(
-                    'assets/wallet.json',
-                    controller: _controller,
-                    onLoaded: (composition) {
-                      _controller
-                        ..duration = composition.duration
-                        ..repeat();
-                    },
-                  ),
-                ),
-                CupertinoButton(
-                  color: Colors.green,
-                  child: const Text("Ok"),
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    Navigator.pop(context);
-                  },
-                )
-              ],
-            );
-          },
-        )});
+    await FirebaseFirestore.instance
+        .collection("SportistanUsers")
+        .doc(id)
+        .update({'sportistanCredit': widget.amount + current}).then((value) => {
+              showModalBottomSheet(
+                isDismissible: false,
+                isScrollControlled: false,
+                enableDrag: false,
+                showDragHandle: true,
+                context: context,
+                builder: (ctx) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      const Text(
+                        "Success",
+                        style: TextStyle(
+                            fontFamily: 'DMSans',
+                            fontSize: 22,
+                            color: Colors.green),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "Transaction is Completed. Amount Rs.${widget.amount} added successfully in your wallet",
+                          style: const TextStyle(
+                              fontFamily: 'DMSans',
+                              fontSize: 20,
+                              color: Colors.black54),
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height / 4,
+                        width: MediaQuery.of(context).size.width / 2,
+                        child: Lottie.asset(
+                          'assets/wallet.json',
+                          controller: _controller,
+                          onLoaded: (composition) {
+                            _controller
+                              ..duration = composition.duration
+                              ..repeat();
+                          },
+                        ),
+                      ),
+                      CupertinoButton(
+                        color: Colors.green,
+                        child: const Text("Ok"),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          Navigator.pop(context);
+                        },
+                      )
+                    ],
+                  );
+                },
+              )
+            });
   }
+
+
 }

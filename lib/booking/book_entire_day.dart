@@ -621,59 +621,173 @@ class _BookEntireDayState extends State<BookEntireDay> {
                         ]),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height / 8),
-                  CupertinoButton(
-                      color: Colors.green,
-                      onPressed: () async {
-                        if (serviceChargePay == 0) {
-                          await createBooking();
-                        } else {
-                          if (Platform.isAndroid) {
-                            final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Gateway(amount: serviceChargePay, addInWallet: false,
-                                  ),
-                                ));
+            CupertinoButton(
+                color: Colors.green,
+                onPressed: () async {
+                  if (serviceChargePay == 0) {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (buildContextWaiting) {
+                        return Column(
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceEvenly,
+                          children: [
+                            const Text("Please Wait",
+                                style: TextStyle(
+                                    fontFamily: "DMSans",
+                                    fontSize: 22)),
+                            Image.asset('assets/logo.png',
+                                height:
+                                MediaQuery.of(context).size.height /
+                                    8),
+                            AnimatedTextKit(animatedTexts: [
+                              TyperAnimatedText(
+                                  "We are confirming your booking..",
+                                  textStyle:
+                                  const TextStyle(fontSize: 22)),
+                            ]),
+                            const CircularProgressIndicator(
+                                strokeWidth: 1, color: Colors.green),
+                            CupertinoButton(
+                                onPressed: () {
+                                  Navigator.pop(buildContextWaiting);
+                                },
+                                child: const Text('Cancel'))
+                          ],
+                        );
+                      },
+                    );
+                    await createBooking();
+                  } else {
+                    if (Platform.isAndroid) {
+                      final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Gateway(
+                              amount: serviceChargePay,
+                              addInWallet: false,
+                            ),
+                          ));
 
-                            if (result) {
-                              if (mounted) {
-                                createBooking();
-                              }
-                            } else {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text("Payment Failed")));
-                              }
-                            }
-                          } else {
-                            final result = await Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) =>  Gateway(amount: serviceChargePay, addInWallet: false,
-                                  ),
-                                ));
-                            if (result) {
-                              if (mounted) {
-                                createBooking();
-                              }
-                            } else {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text("Payment Failed")));
-                              }
-                            }
+                      if (result != null) {
+                        if (result) {
+                          if (mounted) {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (buildContextWaiting) {
+                                return Column(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    const Text("Please Wait",
+                                        style: TextStyle(
+                                            fontFamily: "DMSans",
+                                            fontSize: 22)),
+                                    Image.asset('assets/logo.png',
+                                        height: MediaQuery.of(context)
+                                            .size
+                                            .height /
+                                            8),
+                                    AnimatedTextKit(animatedTexts: [
+                                      TyperAnimatedText(
+                                          "We are confirming your booking..",
+                                          textStyle: const TextStyle(
+                                              fontSize: 22)),
+                                    ]),
+                                    const CircularProgressIndicator(
+                                        strokeWidth: 1,
+                                        color: Colors.green),
+                                    CupertinoButton(
+                                        onPressed: () {
+                                          Navigator.pop(
+                                              buildContextWaiting);
+                                        },
+                                        child: const Text('Cancel'))
+                                  ],
+                                );
+                              },
+                            );
+                            createBooking();
                           }
                         }
-                      },
-                      child: ValueListenableBuilder(
-                          valueListenable: checkBoxListener,
-                          builder: (context, value, child) => serviceChargePay ==
-                                  0
-                              ? const Text('Book Now')
-                              : Text(
-                                  'Pay ₹${serviceChargePay.round().toString()}'))),
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Payment Cancelled")));
+                        }
+                      }
+                    } else {
+                      final result = await Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (context) => Gateway(
+                                amount: serviceChargePay,
+                                addInWallet: false,
+                              )));
+                      if (result != null) {
+                        if (result) {
+                          if (mounted) {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (buildContextWaiting) {
+                                return Column(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    const Text("Please Wait",
+                                        style: TextStyle(
+                                            fontFamily: "DMSans",
+                                            fontSize: 22)),
+                                    Image.asset('assets/logo.png',
+                                        height: MediaQuery.of(context)
+                                            .size
+                                            .height /
+                                            8),
+                                    AnimatedTextKit(animatedTexts: [
+                                      TyperAnimatedText(
+                                          "We are confirming your booking..",
+                                          textStyle: const TextStyle(
+                                              fontSize: 22)),
+                                    ]),
+                                    const CircularProgressIndicator(
+                                        strokeWidth: 1,
+                                        color: Colors.green),
+                                    CupertinoButton(
+                                        onPressed: () {
+                                          Navigator.pop(
+                                              buildContextWaiting);
+                                        },
+                                        child: const Text('Cancel'))
+                                  ],
+                                );
+                              },
+                            );
+                            createBooking();
+                          }
+                        } else {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text("Payment Failed")));
+                          }
+                        }
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Payment Cancelled")));
+                        }
+                      }
+                    }
+                  }
+                },
+                child: ValueListenableBuilder(
+                    valueListenable: checkBoxListener,
+                    builder: (context, value, child) => serviceChargePay == 0
+                        ? const Text('Payable Now')
+                        : Text(
+                        'Pay ₹${serviceChargePay.round().toString()}'))),
                   TextButton(
                       onPressed: () {
                         showModalBottomSheet(

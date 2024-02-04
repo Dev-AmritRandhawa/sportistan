@@ -23,7 +23,7 @@ import 'package:SportistanPro/widgets/errors.dart';
 import 'package:SportistanPro/widgets/page_route.dart';
 
 class MapKey {
-  static String mapKey = 'AIzaSyAE3ig_thIoD9vV_HP6KD9HG8dgU_epnII';
+  static String mapKey = 'AIzaSyB3UX-i3zW0iDWnsaOLHDIN6CeE6IqTBEg';
 }
 
 class MainPage extends StatefulWidget {
@@ -240,14 +240,16 @@ class _MainPageState extends State<MainPage>
                           : Shimmer.fromColors(
                               baseColor: Colors.grey,
                               highlightColor: Colors.white,
-
-                              child: const Center(child: CircularProgressIndicator(strokeWidth: 1,))),
+                              child: const Center(
+                                  child: CircularProgressIndicator(
+                                strokeWidth: 1,
+                              ))),
                     ),
                   ), //FlexibleSpaceBar
 
                   //IconButton
                   //<Widget>[]
-                ), //Sli
+                ),
 
                 SliverToBoxAdapter(
                   child: ValueListenableBuilder(

@@ -39,8 +39,6 @@ class _SportistanCreditState extends State<SportistanCredit>
   TextEditingController addBalanceController = TextEditingController();
   GlobalKey<FormState> addBalanceControllerKey = GlobalKey<FormState>();
 
-
-
   final _focusNode = FocusNode();
 
   KeyboardActionsConfig _buildConfig(BuildContext context) {
@@ -81,138 +79,171 @@ class _SportistanCreditState extends State<SportistanCredit>
       body: KeyboardActions(
         config: _buildConfig(context),
         child: SafeArea(
-          child: StreamBuilder(stream: _server
-              .collection("SportistanUsers")
-              .where("userID", isEqualTo: _auth.currentUser!.uid).snapshots(), builder: (context, snapshot) {
-            return snapshot.hasData ? Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                   Center(
-                        child: Column(
-                          children: [
-                            Image.asset('assets/logo.png',
-                                height: MediaQuery.of(context).size.height /
-                                    15),
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                'Sportistan',
-                                style: TextStyle(
-                                    fontFamily: "DMSans",
-                                    fontSize: 20,
-                                    color: Colors.black54),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                'Your Balance',
-                                style: TextStyle(
+          child: StreamBuilder(
+            stream: _server
+                .collection("SportistanUsers")
+                .where("userID", isEqualTo: _auth.currentUser!.uid)
+                .snapshots(),
+            builder: (context, snapshot) {
+              return snapshot.hasData
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                          Center(
+                            child: Column(
+                              children: [
+                                Image.asset('assets/logo.png',
+                                    height: MediaQuery.of(context).size.height /
+                                        15),
+                                const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'Sportistan',
+                                    style: TextStyle(
+                                        fontFamily: "DMSans",
+                                        fontSize: 20,
+                                        color: Colors.black54),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'Your Balance',
+                                    style: TextStyle(
+                                        fontFamily: "DMSans",
+                                        fontSize:
+                                            MediaQuery.of(context).size.height /
+                                                20,
+                                        color: Colors.black54),
+                                  ),
+                                ),
+                                Text(
+                                  "Rs.${snapshot.data!.docChanges.first.doc.get('sportistanCredit')}",
+                                  style: TextStyle(
                                     fontFamily: "DMSans",
                                     fontSize:
-                                    MediaQuery.of(context).size.height /
-                                        20,
-                                    color: Colors.black54),
-                              ),
-                            ),
-                            Text(
-                              "Rs.${snapshot.data!.docChanges.first.doc.get('sportistanCredit')}",
-                              style: TextStyle(
-                                fontFamily: "DMSans",
-                                fontSize:
-                                MediaQuery.of(context).size.height /
-                                    20,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            Form(
-                                key: addBalanceControllerKey,
-                                child: SizedBox(
-                                  width: MediaQuery.of(context).size.width /
-                                      1.5,
-                                  child: TextFormField(
-                                    cursorColor: Colors.black54,
-                                    controller: addBalanceController,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
-                                    focusNode: _focusNode,
-                                    keyboardType: TextInputType.number,
-                                    validator: (value) {
-                                     if(value!.isEmpty){
-                                       return 'Enter Amount';
-                                     }
-                                      else if (num.parse(value.toString()) >
-                                          50000 ||
-                                          num.parse(value.toString()) <=
-                                              0) {
-                                        return 'Min Rs.1 to Max Rs.50000';
-                                      } else {
-                                        return null;
-                                      }
-                                    },
-                                    decoration: const InputDecoration(
-                                        prefixIcon: Icon(Icons.add),
-                                        border: OutlineInputBorder(),
-                                        filled: true,
-                                        fillColor: Colors.white),
+                                        MediaQuery.of(context).size.height / 20,
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                ))
-                          ],
-                        ),
-                      ),
+                                ),
+                                Form(
+                                    key: addBalanceControllerKey,
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width /
+                                          1.5,
+                                      child: TextFormField(
+                                        cursorColor: Colors.black54,
+                                        controller: addBalanceController,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.digitsOnly
+                                        ],
+                                        focusNode: _focusNode,
+                                        keyboardType: TextInputType.number,
+                                        validator: (value) {
+                                          if (value!.isEmpty) {
+                                            return 'Enter Amount';
+                                          } else if (num.parse(
+                                                      value.toString()) >
+                                                  50000 ||
+                                              num.parse(value.toString()) <=
+                                                  0) {
+                                            return 'Min Rs.1 to Max Rs.50000';
+                                          } else {
+                                            return null;
+                                          }
+                                        },
+                                        decoration: const InputDecoration(
+                                            prefixIcon: Icon(Icons.add),
+                                            border: OutlineInputBorder(),
+                                            filled: true,
+                                            fillColor: Colors.white),
+                                      ),
+                                    ))
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height / 4,
+                            child: Lottie.asset(
+                              'assets/wallet.json',
+                              controller: _controller,
+                              onLoaded: (composition) {
+                                _controller
+                                  ..duration = composition.duration
+                                  ..repeat();
+                              },
+                            ),
+                          ),
+                          CupertinoButton(
+                              color: Colors.green.shade900,
+                              onPressed: () async {
+                                if (addBalanceControllerKey.currentState!
+                                    .validate()) {
+                                  if (Platform.isAndroid) {
+                                    final result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Gateway(
+                                                  amount: num.parse(
+                                                      addBalanceController
+                                                          .value.text
+                                                          .toString()),
+                                                  addInWallet: true,
+                                                )));
 
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 4,
-                    child: Lottie.asset(
-                      'assets/wallet.json',
-                      controller: _controller,
-                      onLoaded: (composition) {
-                        _controller
-                          ..duration = composition.duration
-                          ..repeat();
-                      },
-                    ),
-                  ),
-                  CupertinoButton(
-                      color: Colors.green.shade900,
-                      onPressed: () {
-                        if (addBalanceControllerKey.currentState!.validate()) {
-
-                          if(Platform.isAndroid){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                              Gateway(
-                                amount:
-                                num.parse(addBalanceController.value.text.toString()), addInWallet: true,
-                              )));
-                        }
-                        if(Platform.isIOS){
-                          Navigator.push(context, CupertinoPageRoute(builder: (context) => Gateway(
-                            amount:
-                            num.parse(addBalanceController.value.text.toString()), addInWallet: true,
-                          ),));
-                        }
-                        }
-                      },
-                      child: const Text('Add Credits')),
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      "Your Payment is 100% Secure",
-                      style: TextStyle(
-                          fontFamily: "DMSans",
-                          fontSize: 20,
-                          color: Colors.black54),
-                    ),
-                  )
-                ]) : const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-
-                  Center(child: CircularProgressIndicator(strokeWidth: 1,))
-            ],);
-          },),
-
+                                    if (result == null) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                                content:
+                                                    Text("Payment Cancelled")));
+                                      }
+                                    }
+                                  } else {
+                                    final result = await Navigator.push(
+                                        context,
+                                        CupertinoPageRoute(
+                                          builder: (context) => Gateway(
+                                            amount: num.parse(
+                                                addBalanceController.value.text
+                                                    .toString()),
+                                            addInWallet: true,
+                                          ),
+                                        ));
+                                    if (result == null) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                                content:
+                                                    Text("Payment Cancelled")));
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              child: const Text('Add Credits')),
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              "Your Payment is 100% Secure",
+                              style: TextStyle(
+                                  fontFamily: "DMSans",
+                                  fontSize: 20,
+                                  color: Colors.black54),
+                            ),
+                          )
+                        ])
+                  : const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Center(
+                            child: CircularProgressIndicator(
+                          strokeWidth: 1,
+                        ))
+                      ],
+                    );
+            },
+          ),
         ),
       ),
     );

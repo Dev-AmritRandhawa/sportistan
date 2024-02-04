@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:SportistanPro/authentication/set_location.dart';
 import 'package:SportistanPro/main.dart';
-import 'package:SportistanPro/nav/nav_home.dart';
 import 'package:SportistanPro/widgets/errors.dart';
 import 'package:SportistanPro/widgets/page_route.dart';
 import 'package:chips_choice/chips_choice.dart';
@@ -735,6 +734,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
         'userID': _auth.currentUser!.uid
       }).then((value) => {
             pref.setString('name', nameController.value.text.toString()),
+            pref.setString('number', numberController.value.text.toString()),
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text("Account Created Successfully",
                   style: TextStyle(
@@ -743,7 +743,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication>
                   )),
               backgroundColor: Colors.black87,
             )),
-            PageRouter.pushRemoveUntil(context, const NavHome())
+            PageRouter.pushRemoveUntil(context, const SetLocation())
           });
     } catch (error) {
       loader.value = false;

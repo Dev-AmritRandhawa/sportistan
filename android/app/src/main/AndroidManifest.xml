@@ -52,7 +52,7 @@
             android:value="false" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAE3ig_thIoD9vV_HP6KD9HG8dgU_epnII" />
+            android:value="AIzaSyB3UX-i3zW0iDWnsaOLHDIN6CeE6IqTBEg" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher" />
