@@ -74,13 +74,13 @@ android {
             // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
             minSdkVersion 24
             targetSdkVersion flutter.targetSdkVersion
-            versionCode=13
-            versionName=13
+            versionCode=15
+            versionName=15
         }
 
         signingConfigs {
             release {
-                storeFile file("C:/Users/amrit/StudioProjects/sportistan/android/app/upload.keystore")
+                storeFile file("C:/Users/amrit/StudioProjects/sportistan/android/app/upload.jks")
                 storePassword "android"
                 keyAlias "androidKey"
                 keyPassword "android"

@@ -28,7 +28,9 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
-
+if(paymentInit){
+  initiatePaytmTransaction();
+}
     super.initState();
   }
 
@@ -70,9 +72,7 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
                               onLoaded: (composition) {
                                 _controller
                                   ..duration = composition.duration
-                                  ..forward().then((value) => {
-                                      initiatePaytmTransaction()
-                                  });
+                                  ..forward();
                               },
                             ),
                           ),
@@ -147,7 +147,7 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
 
     try {
       const String firebaseFunctionUrl =
-          'https://initiatepaytmtransaction-kyawqf5yqa-uc.a.run.app';
+          'https://initiatepaytmtransaction-kyawqf5yqa-uc.a.run.app/';
 
       final Map<String, dynamic> requestBody = {
         "amount": widget.amount,
@@ -177,9 +177,11 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
           res.then((value) {
             _statusTransaction(orderID: orderID);
           }).catchError((onError) {
+            print(onError);
             loading.value = false;
           });
         } catch (err) {
+          print(err);
           loading.value = false;
           return;
         }
@@ -194,9 +196,8 @@ class _GatewayState extends State<Gateway> with SingleTickerProviderStateMixin {
   Future<void> _statusTransaction({required String orderID}) async {
     try {
       const String firebaseFunctionUrl =
-          'https://statuspaytmtransaction-kyawqf5yqa-uc.a.run.app';
+          'https://statuspaytmtransaction-kyawqf5yqa-uc.a.run.app/';
       final Map<String, dynamic> requestBody = {
-        "mid": 'SPORTS33075460479694',
         "orderId": orderID,
       };
 

@@ -1108,7 +1108,8 @@ class _BookASlotState extends State<BookASlot> {
               )
             : Center(
                 child: SingleChildScrollView(
-                  child: Column(children: [
+                  child: Column(
+                      children: [
                     const Row(
                       children: [
                         Padding(
@@ -1450,174 +1451,176 @@ class _BookASlotState extends State<BookASlot> {
                             ),
                           ]),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height / 8),
-                    CupertinoButton(
-                        color: Colors.green,
-                        onPressed: () async {
-                          if (newAmount == 0) {
-                            showModalBottomSheet(
-                              context: context,
-                              builder: (buildContextWaiting) {
-                                return Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    const Text("Please Wait",
-                                        style: TextStyle(
-                                            fontFamily: "DMSans",
-                                            fontSize: 22)),
-                                    Image.asset('assets/logo.png',
-                                        height:
-                                            MediaQuery.of(context).size.height /
-                                                8),
-                                    AnimatedTextKit(animatedTexts: [
-                                      TyperAnimatedText(
-                                          "We are confirming your booking..",
-                                          textStyle:
-                                              const TextStyle(fontSize: 22)),
-                                    ]),
-                                    const CircularProgressIndicator(
-                                        strokeWidth: 1, color: Colors.green),
-                                    CupertinoButton(
-                                        onPressed: () {
-                                          Navigator.pop(buildContextWaiting);
-                                        },
-                                        child: const Text('Cancel'))
-                                  ],
-                                );
-                              },
-                            );
-                            await createBooking();
-                          } else {
-                            if (Platform.isAndroid) {
-                              final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Gateway(
-                                      amount: serverCommissionCharge,
-                                      addInWallet: false,
-                                    ),
-                                  ));
-
-                              if (result != null) {
-                                if (result) {
-                                  if (mounted) {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      builder: (buildContextWaiting) {
-                                        return Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            const Text("Please Wait",
-                                                style: TextStyle(
-                                                    fontFamily: "DMSans",
-                                                    fontSize: 22)),
-                                            Image.asset('assets/logo.png',
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height /
-                                                    8),
-                                            AnimatedTextKit(animatedTexts: [
-                                              TyperAnimatedText(
-                                                  "We are confirming your booking..",
-                                                  textStyle: const TextStyle(
-                                                      fontSize: 22)),
-                                            ]),
-                                            const CircularProgressIndicator(
-                                                strokeWidth: 1,
-                                                color: Colors.green),
-                                            CupertinoButton(
-                                                onPressed: () {
-                                                  Navigator.pop(
-                                                      buildContextWaiting);
-                                                },
-                                                child: const Text('Cancel'))
-                                          ],
-                                        );
-                                      },
-                                    );
-                                    createBooking();
-                                  }
-                                }
-                              } else {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text("Payment Cancelled")));
-                                }
-                              }
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CupertinoButton(
+                          color: Colors.green,
+                          onPressed: () async {
+                            if (newAmount == 0) {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (buildContextWaiting) {
+                                  return Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      const Text("Please Wait",
+                                          style: TextStyle(
+                                              fontFamily: "DMSans",
+                                              fontSize: 22)),
+                                      Image.asset('assets/logo.png',
+                                          height:
+                                              MediaQuery.of(context).size.height /
+                                                  8),
+                                      AnimatedTextKit(animatedTexts: [
+                                        TyperAnimatedText(
+                                            "We are confirming your booking..",
+                                            textStyle:
+                                                const TextStyle(fontSize: 22)),
+                                      ]),
+                                      const CircularProgressIndicator(
+                                          strokeWidth: 1, color: Colors.green),
+                                      CupertinoButton(
+                                          onPressed: () {
+                                            Navigator.pop(buildContextWaiting);
+                                          },
+                                          child: const Text('Cancel'))
+                                    ],
+                                  );
+                                },
+                              );
+                              await createBooking();
                             } else {
-                              final result = await Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
+                              if (Platform.isAndroid) {
+                                final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
                                       builder: (context) => Gateway(
-                                            amount: serverCommissionCharge,
-                                            addInWallet: false,
-                                          )));
-                              if (result != null) {
-                                if (result) {
-                                  if (mounted) {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      builder: (buildContextWaiting) {
-                                        return Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            const Text("Please Wait",
-                                                style: TextStyle(
-                                                    fontFamily: "DMSans",
-                                                    fontSize: 22)),
-                                            Image.asset('assets/logo.png',
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height /
-                                                    8),
-                                            AnimatedTextKit(animatedTexts: [
-                                              TyperAnimatedText(
-                                                  "We are confirming your booking..",
-                                                  textStyle: const TextStyle(
+                                        amount: serverCommissionCharge,
+                                        addInWallet: false,
+                                      ),
+                                    ));
+
+                                if (result != null) {
+                                  if (result) {
+                                    if (mounted) {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (buildContextWaiting) {
+                                          return Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              const Text("Please Wait",
+                                                  style: TextStyle(
+                                                      fontFamily: "DMSans",
                                                       fontSize: 22)),
-                                            ]),
-                                            const CircularProgressIndicator(
-                                                strokeWidth: 1,
-                                                color: Colors.green),
-                                            CupertinoButton(
-                                                onPressed: () {
-                                                  Navigator.pop(
-                                                      buildContextWaiting);
-                                                },
-                                                child: const Text('Cancel'))
-                                          ],
-                                        );
-                                      },
-                                    );
-                                    createBooking();
+                                              Image.asset('assets/logo.png',
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height /
+                                                      8),
+                                              AnimatedTextKit(animatedTexts: [
+                                                TyperAnimatedText(
+                                                    "We are confirming your booking..",
+                                                    textStyle: const TextStyle(
+                                                        fontSize: 22)),
+                                              ]),
+                                              const CircularProgressIndicator(
+                                                  strokeWidth: 1,
+                                                  color: Colors.green),
+                                              CupertinoButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(
+                                                        buildContextWaiting);
+                                                  },
+                                                  child: const Text('Cancel'))
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      createBooking();
+                                    }
                                   }
                                 } else {
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
-                                            content: Text("Payment Failed")));
+                                            content: Text("Payment Cancelled")));
                                   }
                                 }
                               } else {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text("Payment Cancelled")));
+                                final result = await Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                        builder: (context) => Gateway(
+                                              amount: serverCommissionCharge,
+                                              addInWallet: false,
+                                            )));
+                                if (result != null) {
+                                  if (result) {
+                                    if (mounted) {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (buildContextWaiting) {
+                                          return Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              const Text("Please Wait",
+                                                  style: TextStyle(
+                                                      fontFamily: "DMSans",
+                                                      fontSize: 22)),
+                                              Image.asset('assets/logo.png',
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height /
+                                                      8),
+                                              AnimatedTextKit(animatedTexts: [
+                                                TyperAnimatedText(
+                                                    "We are confirming your booking..",
+                                                    textStyle: const TextStyle(
+                                                        fontSize: 22)),
+                                              ]),
+                                              const CircularProgressIndicator(
+                                                  strokeWidth: 1,
+                                                  color: Colors.green),
+                                              CupertinoButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(
+                                                        buildContextWaiting);
+                                                  },
+                                                  child: const Text('Cancel'))
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      createBooking();
+                                    }
+                                  } else {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                              content: Text("Payment Failed")));
+                                    }
+                                  }
+                                } else {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text("Payment Cancelled")));
+                                  }
                                 }
                               }
                             }
-                          }
-                        },
-                        child: ValueListenableBuilder(
-                            valueListenable: checkBoxListener,
-                            builder: (context, value, child) => newAmount == 0
-                                ? const Text('Payable Now')
-                                : Text(
-                                    'Pay ₹${newAmount.round().toString()}'))),
+                          },
+                          child: ValueListenableBuilder(
+                              valueListenable: checkBoxListener,
+                              builder: (context, value, child) => newAmount == 0
+                                  ? const Text('Payable Now')
+                                  : Text(
+                                      'Pay ₹${newAmount.round().toString()}'))),
+                    ),
                     TextButton(
                         onPressed: () {
                           showModalBottomSheet(
@@ -1649,7 +1652,8 @@ class _BookASlotState extends State<BookASlot> {
                           'View Cancellation Policy',
                           style: TextStyle(fontFamily: "DMSans", fontSize: 16),
                         )),
-                  ]),
+                      SizedBox(height: MediaQuery.of(context).size.height/6,)
+                      ]),
                 ),
               ),
       ),

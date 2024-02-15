@@ -49,8 +49,8 @@ class _SearchGroundsByAlgoliaState extends State<SearchGroundsByAlgolia>
   }
   ValueNotifier<int> dotsListener = ValueNotifier<int>(0);
   final hitsSearcher = HitsSearcher(
-    applicationID: '9W2OJ32UHH',
-    apiKey: '68e494b082ebbd33fcaf79b5383e7c14',
+    applicationID: 'L4GGZ7FPPS',
+    apiKey: '693c8fe9f819b1e16caddcc723f42d0f',
     indexName: 'SportistanPartners',
   );
   ValueNotifier<bool> panelListener = ValueNotifier<bool>(false);

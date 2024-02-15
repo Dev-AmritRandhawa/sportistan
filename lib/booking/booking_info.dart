@@ -449,7 +449,7 @@ class _BookingInfoState extends State<BookingInfo> {
                                                                 "DMSans")),
                                                     InkWell(
                                                         onTap: () {
-                                                          FlutterPhoneDirectCaller.callNumber(doc["teamA"]["phoneNumber"].toString());
+                                                          FlutterPhoneDirectCaller.callNumber(doc["teamB"]["phoneNumber"].toString());
                                                         },
                                                         child: const Icon(Icons.call,color: Colors.blue,))
                                                   ],

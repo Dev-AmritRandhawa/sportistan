@@ -223,7 +223,7 @@ class _MainPageState extends State<MainPage>
                                       style:
                                           const TextStyle(color: Colors.black),
                                       decoration: InputDecoration(
-                                          hintText: "Search Ground",
+                                          hintText: "Search Ground, Location, Near Me",
                                           fillColor: Colors.grey.shade200,
                                           filled: true,
                                           enabled: false,
