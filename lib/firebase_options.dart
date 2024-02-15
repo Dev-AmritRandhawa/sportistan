@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '39436193342',
     projectId: 'yoursportistan',
     storageBucket: 'yoursportistan.appspot.com',
-    androidClientId: '39436193342-f51m9dcpa43bad00u02lu2ggr593nd89.apps.googleusercontent.com',
+    androidClientId: '39436193342-4e2r2cfe4in0gao61uvjjh1kmrloiaeo.apps.googleusercontent.com',
     iosClientId: '39436193342-jsv9a7ip9tamjsnp6rpc9tj8utrafchi.apps.googleusercontent.com',
     iosBundleId: 'co.in.sportistan.sportistan',
   );

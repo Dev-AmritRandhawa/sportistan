@@ -54,7 +54,7 @@ dependencies:
   google_nav_bar: ^5.0.6
   permission_handler: ^11.0.1
   another_flushbar: ^1.12.30
-  pinput: ^3.0.1
+  pinput: ^4.0.0
   otp_timer_button: ^1.1.0
   google_sign_in: ^6.1.5
   flutter_share: 2.0.0

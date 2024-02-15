@@ -34,7 +34,7 @@ if (keystorePropertiesFile.exists()) {
 
 
 android {
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion 34
     ndkVersion "25.1.8937393"
 
     compileOptions {
@@ -51,7 +51,7 @@ android {
     }
     android {
         namespace "co.in.sportistan.sportistan"
-        compileSdkVersion flutter.compileSdkVersion
+        compileSdkVersion 34
         ndkVersion flutter.ndkVersion
 
         compileOptions {
@@ -74,15 +74,15 @@ android {
             // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
             minSdkVersion 24
             targetSdkVersion flutter.targetSdkVersion
-            versionCode=15
-            versionName=15
+            versionCode=16
+            versionName=16
         }
 
         signingConfigs {
             release {
-                storeFile file("C:/Users/amrit/StudioProjects/sportistan/android/app/upload.jks")
+                storeFile file("C:/Users/amrit/StudioProjects/sportistan/android/app/debug.keystore")
                 storePassword "android"
-                keyAlias "androidKey"
+                keyAlias "androiddebugkey"
                 keyPassword "android"
             }
         }
