@@ -431,32 +431,32 @@ class _MainPageState extends State<MainPage>
                                                       shrinkWrap: true,
                                                       itemCount: docs.length,
                                                       itemBuilder: (_, index) {
-                                                        final doc = docs[index];
+
                                                         List<dynamic> images =
-                                                            doc["groundImages"];
+                                                            docs[index]["groundImages"];
                                                         List<dynamic>
                                                             listCount =
-                                                            doc['badges'];
-                                                        groundServices = doc[
+                                                        docs[index]['badges'];
+                                                        groundServices = docs[index][
                                                             'groundServices'];
 
-                                                        onwards = doc['onwards']
+                                                        onwards = docs[index]['onwards']
                                                             .toString();
 
                                                         return GestureDetector(
                                                           onTap: () async {
                                                             groundID =
-                                                                doc["groundID"];
-                                                            groundType = doc[
+                                                                docs[index]["groundID"];
+                                                            groundType = docs[index][
                                                                 "groundType"];
-                                                            groundAddress = doc[
+                                                            groundAddress = docs[index][
                                                                 "locationName"];
-                                                            groundName = doc[
+                                                            groundName = docs[index][
                                                                 "groundName"];
                                                             panelListener
                                                                 .value = true;
                                                             GeoPoint geoPoint =
-                                                                doc["geo"][
+                                                            docs[index]["geo"][
                                                                     'geopoint'];
                                                             destinationLat =
                                                                 geoPoint
@@ -528,7 +528,7 @@ class _MainPageState extends State<MainPage>
                                                                               BorderRadius.circular(10),
                                                                           child:
                                                                               Image.network(
-                                                                            doc["groundImages"][itemIndex],
+                                                                                docs[index]["groundImages"][itemIndex],
                                                                             loadingBuilder: (context,
                                                                                 child,
                                                                                 loadingProgress) {
@@ -597,7 +597,7 @@ class _MainPageState extends State<MainPage>
                                                                               child: Padding(
                                                                                 padding: const EdgeInsets.only(left: 8.0),
                                                                                 child: Text(
-                                                                                  doc.get('groundName'),
+                                                                                  docs[index].get('groundName'),
                                                                                   softWrap: true,
                                                                                   maxLines: 3,
                                                                                   overflow: TextOverflow.ellipsis,
@@ -614,7 +614,7 @@ class _MainPageState extends State<MainPage>
                                                                             ),
                                                                             Padding(
                                                                               padding: const EdgeInsets.only(right: 8.0),
-                                                                              child: Text(doc.get('profileRating').toString()),
+                                                                              child: Text(docs[index].get('profileRating').toString()),
                                                                             ),
                                                                           ],
                                                                         ),
@@ -630,7 +630,7 @@ class _MainPageState extends State<MainPage>
                                                                                 child: Row(
                                                                                   children: [
                                                                                     const Text('Starting Onwards : ', style: TextStyle()),
-                                                                                    Text("₹${doc['onwards']}",
+                                                                                    Text("₹${docs[index]['onwards']}",
                                                                                         style: const TextStyle(
                                                                                           fontSize: 18,
                                                                                           fontFamily: "Nunito",
