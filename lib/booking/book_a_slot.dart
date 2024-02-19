@@ -300,7 +300,7 @@ class _BookASlotState extends State<BookASlot> {
                                               nameKeyA.currentState!.validate();
                                             },
                                             enabled: !value,
-                                            obscureText: !hideData.value,
+                                            obscureText: hideData.value,
                                             decoration: const InputDecoration(
                                                 fillColor: Colors.white,
                                                 border: InputBorder.none,
